@@ -1577,8 +1577,8 @@ The backend is fully integrated with Google's Gemini AI API for medical analysis
 
 The Gemini API key is configured in `application.properties`:
 ```properties
-gemini.api.key=AIzaSyCgHPi2CkjF_cjsXNIxBq3mrshCSz1x7UM
-gemini.api.url=https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent
+gemini.api.key=
+gemini.api.url=
 ```
 
 ### Using AI Analysis
@@ -1606,5 +1606,5 @@ Example request:
 
 ## License
 
-This project is created for the Medical AI Hackathon.
+This project is created for Software Engineering Program at DAU.
 
