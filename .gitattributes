@@ -8,3 +8,4 @@ C:/AFIF/healthcare_with_ai/AI/Retinal-Disease-Detection/models/ResNet50_v1.0.py.
 AI/Parkinson-Patient-Speech-Dataset filter=lfs diff=lfs merge=lfs -text
 AI/Parkinson-Patient-Speech-Dataset/speech/data/lm/lm.binary filter=lfs diff=lfs merge=lfs -text
 AI/Parkinson-Patient-Speech-Dataset/speech/data/lm/trie filter=lfs diff=lfs merge=lfs -text
+AI/Parkinson-Patient-Speech-Dataset/speech/data/lm/models.zip filter=lfs diff=lfs merge=lfs -text
