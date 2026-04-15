@@ -1,25 +1,25 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, Edit } from 'lucide-react'
-import { appointmentsAPI } from '../services/api'
-import { formatDateTime } from '../utils/dateUtils'
+import { prescriptionsAPI } from '../services/api'
+import { formatDate } from '../utils/dateUtils'
 
-const AppointmentView = () => {
+const PrescriptionView = () => {
   const { id } = useParams()
-  const [appointment, setAppointment] = useState(null)
+  const [prescription, setPrescription] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchAppointment()
+    fetchPrescription()
   }, [id])
 
-  const fetchAppointment = async () => {
+  const fetchPrescription = async () => {
     try {
-      const response = await appointmentsAPI.getById(id)
-      setAppointment(response.data)
+      const response = await prescriptionsAPI.getById(id)
+      setPrescription(response.data)
     } catch (error) {
-      console.error('Error fetching appointment:', error)
-      const errorMessage = error.response?.data?.message || 'Error loading appointment'
+      console.error('Error fetching prescription:', error)
+      const errorMessage = error.response?.data?.message || 'Error loading prescription'
       alert(errorMessage)
     } finally {
       setLoading(false)
@@ -28,12 +28,9 @@ const AppointmentView = () => {
 
   const getStatusBadge = (status) => {
     const badges = {
-      SCHEDULED: 'badge-info',
-      CONFIRMED: 'badge-success',
-      IN_PROGRESS: 'badge-warning',
-      COMPLETED: 'badge-success',
+      ACTIVE: 'badge-success',
+      COMPLETED: 'badge-info',
       CANCELLED: 'badge-danger',
-      NO_SHOW: 'badge-danger',
     }
     return badges[status] || 'badge-info'
   }
@@ -46,12 +43,12 @@ const AppointmentView = () => {
     )
   }
 
-  if (!appointment) {
+  if (!prescription) {
     return (
       <div className="card">
-        <p>Appointment not found</p>
-        <Link to="/appointments" className="btn btn-primary" style={{ marginTop: '1rem' }}>
-          Back to Appointments
+        <p>Prescription not found</p>
+        <Link to="/prescriptions" className="btn btn-primary" style={{ marginTop: '1rem' }}>
+          Back to Prescriptions
         </Link>
       </div>
     )
@@ -61,7 +58,7 @@ const AppointmentView = () => {
     <div>
       <div style={{ marginBottom: '2rem' }}>
         <Link 
-          to="/appointments" 
+          to="/prescriptions" 
           style={{ 
             display: 'inline-flex', 
             alignItems: 'center', 
@@ -72,22 +69,22 @@ const AppointmentView = () => {
           }}
         >
           <ArrowLeft size={18} />
-          Back to Appointments
+          Back to Prescriptions
         </Link>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
-              Appointment Details
+              {prescription.medicationName}
             </h1>
             <p style={{ color: 'var(--text-light)' }}>
-              <span className={`badge ${getStatusBadge(appointment.status)}`}>
-                {appointment.status}
+              <span className={`badge ${getStatusBadge(prescription.status)}`}>
+                {prescription.status}
               </span>
             </p>
           </div>
-          <Link to={`/appointments/${id}/edit`} className="btn btn-primary">
+          <Link to={`/prescriptions/${id}/edit`} className="btn btn-primary">
             <Edit size={18} />
-            Edit Appointment
+            Edit Prescription
           </Link>
         </div>
       </div>
@@ -100,50 +97,66 @@ const AppointmentView = () => {
           <div style={{ display: 'grid', gap: '0.75rem' }}>
             <div>
               <span style={{ color: 'var(--text-light)', fontSize: '0.875rem' }}>Patient</span>
-              <p style={{ fontWeight: '500' }}>{appointment.patientName}</p>
+              <p style={{ fontWeight: '500' }}>{prescription.patientName}</p>
             </div>
           </div>
         </div>
 
         <div className="card">
           <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '1rem' }}>
-            Appointment Details
+            Medication Details
           </h3>
           <div style={{ display: 'grid', gap: '0.75rem' }}>
             <div>
-              <span style={{ color: 'var(--text-light)', fontSize: '0.875rem' }}>Date & Time</span>
-              <p style={{ fontWeight: '500' }}>{formatDateTime(appointment.appointmentDate)}</p>
+              <span style={{ color: 'var(--text-light)', fontSize: '0.875rem' }}>Medication</span>
+              <p style={{ fontWeight: '500' }}>{prescription.medicationName}</p>
+            </div>
+            <div>
+              <span style={{ color: 'var(--text-light)', fontSize: '0.875rem' }}>Dosage</span>
+              <p style={{ fontWeight: '500' }}>{prescription.dosage}</p>
+            </div>
+            <div>
+              <span style={{ color: 'var(--text-light)', fontSize: '0.875rem' }}>Frequency</span>
+              <p style={{ fontWeight: '500' }}>{prescription.frequency}</p>
             </div>
             <div>
               <span style={{ color: 'var(--text-light)', fontSize: '0.875rem' }}>Doctor</span>
-              <p style={{ fontWeight: '500' }}>{appointment.doctorName}</p>
-            </div>
-            <div>
-              <span style={{ color: 'var(--text-light)', fontSize: '0.875rem' }}>Department</span>
-              <p style={{ fontWeight: '500' }}>{appointment.department}</p>
-            </div>
-            <div>
-              <span style={{ color: 'var(--text-light)', fontSize: '0.875rem' }}>Location</span>
-              <p style={{ fontWeight: '500' }}>{appointment.location || '-'}</p>
+              <p style={{ fontWeight: '500' }}>{prescription.doctorName || '-'}</p>
             </div>
           </div>
         </div>
 
-        {appointment.reason && (
+        <div className="card">
+          <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '1rem' }}>
+            Duration
+          </h3>
+          <div style={{ display: 'grid', gap: '0.75rem' }}>
+            <div>
+              <span style={{ color: 'var(--text-light)', fontSize: '0.875rem' }}>Start Date</span>
+              <p style={{ fontWeight: '500' }}>{formatDate(prescription.startDate)}</p>
+            </div>
+            <div>
+              <span style={{ color: 'var(--text-light)', fontSize: '0.875rem' }}>End Date</span>
+              <p style={{ fontWeight: '500' }}>{formatDate(prescription.endDate)}</p>
+            </div>
+          </div>
+        </div>
+
+        {prescription.instructions && (
           <div className="card" style={{ gridColumn: '1 / -1' }}>
             <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '1rem' }}>
-              Reason
+              Instructions
             </h3>
-            <p>{appointment.reason}</p>
+            <p style={{ whiteSpace: 'pre-wrap' }}>{prescription.instructions}</p>
           </div>
         )}
 
-        {appointment.notes && (
+        {prescription.notes && (
           <div className="card" style={{ gridColumn: '1 / -1' }}>
             <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '1rem' }}>
               Notes
             </h3>
-            <p style={{ whiteSpace: 'pre-wrap' }}>{appointment.notes}</p>
+            <p style={{ whiteSpace: 'pre-wrap' }}>{prescription.notes}</p>
           </div>
         )}
       </div>
@@ -151,5 +164,5 @@ const AppointmentView = () => {
   )
 }
 
-export default AppointmentView
+export default PrescriptionView
 

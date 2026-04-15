@@ -5,81 +5,68 @@ import {
   Eye, 
   Edit, 
   Trash2, 
-  Calendar,
-  Clock,
+  FileText,
   User,
   Stethoscope,
-  Building,
-  Activity,
-  CalendarPlus
+  Clock,
+  FolderOpen,
+  FilePlus
 } from 'lucide-react'
-import { appointmentsAPI } from '../services/api'
-import { formatDateTime } from '../utils/dateUtils'
+import { medicalRecordsAPI } from '../services/api'
+import { formatDate } from '../utils/dateUtils'
 
-const Appointments = () => {
-  const [appointments, setAppointments] = useState([])
+const MedicalRecords = () => {
+  const [records, setRecords] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchParams] = useSearchParams()
   const patientId = searchParams.get('patientId')
 
   useEffect(() => {
-    fetchAppointments()
+    fetchRecords()
   }, [patientId])
 
-  const fetchAppointments = async () => {
+  const fetchRecords = async () => {
     try {
       setLoading(true)
-      const response = await appointmentsAPI.getAll(patientId ? parseInt(patientId) : undefined)
-      setAppointments(response.data)
+      const response = await medicalRecordsAPI.getAll(patientId ? parseInt(patientId) : undefined)
+      setRecords(response.data)
     } catch (error) {
-      console.error('Error fetching appointments:', error)
+      console.error('Error fetching records:', error)
     } finally {
       setLoading(false)
     }
   }
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this appointment?')) {
+    if (window.confirm('Are you sure you want to delete this medical record?')) {
       try {
-        await appointmentsAPI.delete(id)
-        fetchAppointments()
+        await medicalRecordsAPI.delete(id)
+        fetchRecords()
       } catch (error) {
-        const errorMessage = error.response?.data?.message || 'Error deleting appointment'
+        const errorMessage = error.response?.data?.message || 'Error deleting record'
         alert(errorMessage)
         console.error(error)
       }
     }
   }
 
-  const getStatusBadge = (status) => {
-    const badges = {
-      SCHEDULED: 'badge-info',
-      CONFIRMED: 'badge-success',
-      IN_PROGRESS: 'badge-warning',
-      COMPLETED: 'badge-success',
-      CANCELLED: 'badge-danger',
-      NO_SHOW: 'badge-danger',
-    }
-    return badges[status] || 'badge-info'
-  }
-
-  const getStatusColor = (status) => {
+  const getTypeColor = (type) => {
     const colors = {
-      SCHEDULED: '#00d4ff',
-      CONFIRMED: '#00ff88',
-      IN_PROGRESS: '#ffd700',
-      COMPLETED: '#00ff88',
-      CANCELLED: '#ff6b6b',
-      NO_SHOW: '#ff6b6b',
+      'LAB_RESULT': '#00d4ff',
+      'IMAGING': '#7c3aed',
+      'DIAGNOSIS': '#ff6b6b',
+      'PROCEDURE': '#ffd700',
+      'CONSULTATION': '#00ff88',
+      'PRESCRIPTION': '#a78bfa',
     }
-    return colors[status] || '#00d4ff'
+    return colors[type] || '#00d4ff'
   }
 
   if (loading) {
     return (
       <div className="loading">
         <div className="spinner" />
-        <p className="loading-text">Loading appointments...</p>
+        <p className="loading-text">Loading medical records...</p>
       </div>
     )
   }
@@ -106,14 +93,14 @@ const Appointments = () => {
             <div style={{
               width: '48px',
               height: '48px',
-              background: 'linear-gradient(135deg, #ffd700, #ff6b6b)',
+              background: 'linear-gradient(135deg, #00ff88, #00d4ff)',
               borderRadius: '14px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 4px 20px rgba(255, 215, 0, 0.3)',
+              boxShadow: '0 4px 20px rgba(0, 255, 136, 0.3)',
             }}>
-              <Calendar size={24} color="white" />
+              <FileText size={24} color="white" />
             </div>
             <div>
               <h1 style={{ 
@@ -121,70 +108,50 @@ const Appointments = () => {
                 fontWeight: '800',
                 marginBottom: '0.125rem',
               }}>
-                Appointments
+                Medical Records
               </h1>
               <p style={{ 
                 color: 'var(--text-secondary)', 
                 fontSize: '0.9rem' 
               }}>
-                {patientId ? 'Patient appointments' : 'Manage all appointments'}
+                {patientId ? 'Patient medical records' : 'All medical records'}
               </p>
             </div>
           </div>
         </div>
         
         <Link 
-          to="/appointments/new" 
+          to="/medical-records/new" 
           className="btn btn-primary"
           style={{ padding: '0.875rem 1.5rem' }}
         >
-          <CalendarPlus size={18} />
-          Schedule Appointment
+          <FilePlus size={18} />
+          Add Record
         </Link>
       </div>
 
       {/* Stats */}
       <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-        gap: '1rem',
-        marginBottom: '2rem',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.5rem',
+        padding: '0.75rem 1rem',
+        background: 'var(--bg-card)',
+        border: '1px solid var(--border-subtle)',
+        borderRadius: '12px',
+        marginBottom: '1.5rem',
         animation: 'fadeInUp 0.5s ease forwards',
         animationDelay: '0.1s',
         opacity: 0,
       }}>
-        {[
-          { label: 'Total', value: appointments.length, color: '#00d4ff' },
-          { label: 'Scheduled', value: appointments.filter(a => a.status === 'SCHEDULED').length, color: '#00d4ff' },
-          { label: 'Confirmed', value: appointments.filter(a => a.status === 'CONFIRMED').length, color: '#00ff88' },
-          { label: 'Completed', value: appointments.filter(a => a.status === 'COMPLETED').length, color: '#a78bfa' },
-        ].map((stat) => (
-          <div 
-            key={stat.label}
-            style={{
-              background: 'var(--bg-card)',
-              border: '1px solid var(--border-subtle)',
-              borderRadius: '12px',
-              padding: '1rem 1.25rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }}
-          >
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{stat.label}</span>
-            <span style={{ 
-              fontSize: '1.5rem', 
-              fontWeight: '700',
-              color: stat.color,
-            }}>
-              {stat.value}
-            </span>
-          </div>
-        ))}
+        <FolderOpen size={18} color="var(--accent-tertiary)" />
+        <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+          <strong style={{ color: 'var(--accent-tertiary)' }}>{records.length}</strong> medical records
+        </span>
       </div>
 
       {/* Content */}
-      {appointments.length === 0 ? (
+      {records.length === 0 ? (
         <div 
           className="card" 
           style={{ 
@@ -198,17 +165,17 @@ const Appointments = () => {
           <div style={{
             width: '80px',
             height: '80px',
-            background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 107, 107, 0.1))',
+            background: 'linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 212, 255, 0.1))',
             borderRadius: '50%',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             margin: '0 auto 1.5rem',
           }}>
-            <Calendar size={36} color="#ffd700" />
+            <FileText size={36} color="#00ff88" />
           </div>
           <h3 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '0.5rem' }}>
-            No Appointments Found
+            No Medical Records Found
           </h3>
           <p style={{ 
             color: 'var(--text-muted)', 
@@ -216,11 +183,11 @@ const Appointments = () => {
             maxWidth: '400px',
             margin: '0 auto 1.5rem',
           }}>
-            Schedule your first appointment to get started
+            Add your first medical record to get started
           </p>
-          <Link to="/appointments/new" className="btn btn-primary">
-            <CalendarPlus size={18} />
-            Schedule First Appointment
+          <Link to="/medical-records/new" className="btn btn-primary">
+            <FilePlus size={18} />
+            Add First Record
           </Link>
         </div>
       ) : (
@@ -235,18 +202,18 @@ const Appointments = () => {
           <table className="table">
             <thead>
               <tr>
+                <th>Title</th>
                 <th>Patient</th>
+                <th>Type</th>
                 <th>Doctor</th>
-                <th>Department</th>
-                <th>Date & Time</th>
-                <th>Status</th>
+                <th>Date</th>
                 <th style={{ width: '120px', textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {appointments.map((appointment, index) => (
+              {records.map((record, index) => (
                 <tr 
-                  key={appointment.id}
+                  key={record.id}
                   style={{
                     animation: 'fadeInUp 0.3s ease forwards',
                     animationDelay: `${index * 0.05}s`,
@@ -258,28 +225,46 @@ const Appointments = () => {
                       <div style={{
                         width: '36px',
                         height: '36px',
-                        background: 'linear-gradient(135deg, #7c3aed, #a78bfa)',
+                        background: `${getTypeColor(record.recordType)}15`,
                         borderRadius: '10px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                       }}>
-                        <User size={16} color="white" />
+                        <FileText size={16} color={getTypeColor(record.recordType)} />
                       </div>
-                      <span style={{ fontWeight: '500' }}>{appointment.patientName}</span>
+                      <span style={{ fontWeight: '500' }}>{record.title}</span>
                     </div>
                   </td>
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <Stethoscope size={14} color="var(--text-muted)" />
-                      <span>{appointment.doctorName}</span>
+                      <User size={14} color="var(--text-muted)" />
+                      <span>{record.patientName}</span>
                     </div>
                   </td>
                   <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <Building size={14} color="var(--text-muted)" />
-                      <span>{appointment.department}</span>
-                    </div>
+                    <span 
+                      style={{
+                        padding: '0.25rem 0.75rem',
+                        background: `${getTypeColor(record.recordType)}15`,
+                        color: getTypeColor(record.recordType),
+                        borderRadius: '100px',
+                        fontSize: '0.8rem',
+                        fontWeight: '500',
+                      }}
+                    >
+                      {record.recordType}
+                    </span>
+                  </td>
+                  <td>
+                    {record.doctorName ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <Stethoscope size={14} color="var(--text-muted)" />
+                        <span>{record.doctorName}</span>
+                      </div>
+                    ) : (
+                      <span style={{ color: 'var(--text-muted)' }}>-</span>
+                    )}
                   </td>
                   <td>
                     <div style={{ 
@@ -287,15 +272,11 @@ const Appointments = () => {
                       alignItems: 'center', 
                       gap: '0.5rem',
                       color: 'var(--text-secondary)',
+                      fontSize: '0.9rem',
                     }}>
                       <Clock size={14} color="var(--text-muted)" />
-                      {formatDateTime(appointment.appointmentDate)}
+                      {formatDate(record.recordDate)}
                     </div>
-                  </td>
-                  <td>
-                    <span className={`badge ${getStatusBadge(appointment.status)}`}>
-                      {appointment.status}
-                    </span>
                   </td>
                   <td>
                     <div style={{ 
@@ -304,21 +285,21 @@ const Appointments = () => {
                       justifyContent: 'flex-end',
                     }}>
                       <Link 
-                        to={`/appointments/${appointment.id}`}
+                        to={`/medical-records/${record.id}`}
                         className="btn btn-ghost"
                         title="View"
                       >
                         <Eye size={16} />
                       </Link>
                       <Link 
-                        to={`/appointments/${appointment.id}/edit`}
+                        to={`/medical-records/${record.id}/edit`}
                         className="btn btn-ghost"
                         title="Edit"
                       >
                         <Edit size={16} />
                       </Link>
                       <button
-                        onClick={() => handleDelete(appointment.id)}
+                        onClick={() => handleDelete(record.id)}
                         className="btn btn-ghost"
                         title="Delete"
                         style={{ color: 'var(--accent-warm)' }}
@@ -337,4 +318,4 @@ const Appointments = () => {
   )
 }
 
-export default Appointments
+export default MedicalRecords

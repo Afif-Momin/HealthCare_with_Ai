@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, Link, useSearchParams } from 'react-router-dom'
 import { Save, ArrowLeft } from 'lucide-react'
-import { appointmentsAPI, patientsAPI } from '../services/api'
-import { formatDateTimeInput } from '../utils/dateUtils'
+import { prescriptionsAPI, patientsAPI } from '../services/api'
+import { formatDateInput } from '../utils/dateUtils'
 
-const AppointmentForm = () => {
+const PrescriptionForm = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -13,19 +13,21 @@ const AppointmentForm = () => {
   const [patients, setPatients] = useState([])
   const [formData, setFormData] = useState({
     patientId: searchParams.get('patientId') || '',
+    medicationName: '',
+    dosage: '',
+    frequency: '',
+    startDate: new Date().toISOString().slice(0, 10),
+    endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+    instructions: '',
     doctorName: '',
-    department: '',
-    appointmentDate: new Date().toISOString().slice(0, 16),
-    status: 'SCHEDULED',
-    reason: '',
     notes: '',
-    location: '',
+    status: 'ACTIVE',
   })
 
   useEffect(() => {
     fetchPatients()
     if (isEdit && id) {
-      fetchAppointment()
+      fetchPrescription()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, isEdit])
@@ -39,23 +41,25 @@ const AppointmentForm = () => {
     }
   }
 
-  const fetchAppointment = async () => {
+  const fetchPrescription = async () => {
     try {
-      const response = await appointmentsAPI.getById(id)
-      const appointment = response.data
+      const response = await prescriptionsAPI.getById(id)
+      const prescription = response.data
       setFormData({
-        patientId: appointment.patientId,
-        doctorName: appointment.doctorName || '',
-        department: appointment.department || '',
-        appointmentDate: appointment.appointmentDate ? formatDateTimeInput(appointment.appointmentDate) : formatDateTimeInput(new Date().toISOString()),
-        status: appointment.status || 'SCHEDULED',
-        reason: appointment.reason || '',
-        notes: appointment.notes || '',
-        location: appointment.location || '',
+        patientId: prescription.patientId,
+        medicationName: prescription.medicationName || '',
+        dosage: prescription.dosage || '',
+        frequency: prescription.frequency || '',
+        startDate: formatDateInput(prescription.startDate) || formatDateInput(new Date().toISOString()),
+        endDate: formatDateInput(prescription.endDate) || formatDateInput(new Date().toISOString()),
+        instructions: prescription.instructions || '',
+        doctorName: prescription.doctorName || '',
+        notes: prescription.notes || '',
+        status: prescription.status || 'ACTIVE',
       })
     } catch (error) {
-      console.error('Error fetching appointment:', error)
-      alert('Error loading appointment')
+      console.error('Error fetching prescription:', error)
+      alert('Error loading prescription')
     }
   }
 
@@ -73,17 +77,18 @@ const AppointmentForm = () => {
       const submitData = {
         ...formData,
         patientId: parseInt(formData.patientId),
-        appointmentDate: formData.appointmentDate ? new Date(formData.appointmentDate).toISOString() : new Date().toISOString(),
-        status: formData.status || 'SCHEDULED',
+        startDate: formData.startDate || new Date().toISOString().split('T')[0],
+        endDate: formData.endDate || new Date().toISOString().split('T')[0],
+        status: formData.status || 'ACTIVE',
       }
       if (isEdit) {
-        await appointmentsAPI.update(id, submitData)
+        await prescriptionsAPI.update(id, submitData)
       } else {
-        await appointmentsAPI.create(submitData)
+        await prescriptionsAPI.create(submitData)
       }
-      navigate('/appointments')
+      navigate('/prescriptions')
     } catch (error) {
-      let errorMessage = 'Error saving appointment'
+      let errorMessage = 'Error saving prescription'
       if (error.response?.data?.errors) {
         const errors = Object.entries(error.response.data.errors)
           .map(([field, message]) => `${field}: ${message}`)
@@ -103,7 +108,7 @@ const AppointmentForm = () => {
     <div>
       <div style={{ marginBottom: '2rem' }}>
         <Link 
-          to="/appointments" 
+          to="/prescriptions" 
           style={{ 
             display: 'inline-flex', 
             alignItems: 'center', 
@@ -114,10 +119,10 @@ const AppointmentForm = () => {
           }}
         >
           <ArrowLeft size={18} />
-          Back to Appointments
+          Back to Prescriptions
         </Link>
         <h1 style={{ fontSize: '2rem', fontWeight: 'bold' }}>
-          {isEdit ? 'Edit Appointment' : 'Schedule New Appointment'}
+          {isEdit ? 'Edit Prescription' : 'Create New Prescription'}
         </h1>
       </div>
 
@@ -143,39 +148,75 @@ const AppointmentForm = () => {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Doctor Name *</label>
+            <label className="form-label">Medication Name *</label>
+            <input
+              type="text"
+              name="medicationName"
+              value={formData.medicationName}
+              onChange={handleChange}
+              className="form-input"
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Dosage *</label>
+            <input
+              type="text"
+              name="dosage"
+              value={formData.dosage}
+              onChange={handleChange}
+              className="form-input"
+              required
+              placeholder="e.g., 500mg, 10ml"
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Frequency *</label>
+            <input
+              type="text"
+              name="frequency"
+              value={formData.frequency}
+              onChange={handleChange}
+              className="form-input"
+              required
+              placeholder="e.g., Twice daily, Once a day"
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Start Date *</label>
+            <input
+              type="date"
+              name="startDate"
+              value={formData.startDate}
+              onChange={handleChange}
+              className="form-input"
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">End Date *</label>
+            <input
+              type="date"
+              name="endDate"
+              value={formData.endDate}
+              onChange={handleChange}
+              className="form-input"
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Doctor Name</label>
             <input
               type="text"
               name="doctorName"
               value={formData.doctorName}
               onChange={handleChange}
               className="form-input"
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Department *</label>
-            <input
-              type="text"
-              name="department"
-              value={formData.department}
-              onChange={handleChange}
-              className="form-input"
-              required
-              placeholder="e.g., Cardiology, Neurology"
-            />
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Appointment Date & Time *</label>
-            <input
-              type="datetime-local"
-              name="appointmentDate"
-              value={formData.appointmentDate}
-              onChange={handleChange}
-              className="form-input"
-              required
             />
           </div>
 
@@ -188,36 +229,21 @@ const AppointmentForm = () => {
               className="form-select"
               required
             >
-              <option value="SCHEDULED">Scheduled</option>
-              <option value="CONFIRMED">Confirmed</option>
-              <option value="IN_PROGRESS">In Progress</option>
+              <option value="ACTIVE">Active</option>
               <option value="COMPLETED">Completed</option>
               <option value="CANCELLED">Cancelled</option>
-              <option value="NO_SHOW">No Show</option>
             </select>
           </div>
 
-          <div className="form-group">
-            <label className="form-label">Location</label>
-            <input
-              type="text"
-              name="location"
-              value={formData.location}
-              onChange={handleChange}
-              className="form-input"
-              placeholder="e.g., Room 101, Building A"
-            />
-          </div>
-
           <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-            <label className="form-label">Reason</label>
-            <input
-              type="text"
-              name="reason"
-              value={formData.reason}
+            <label className="form-label">Instructions</label>
+            <textarea
+              name="instructions"
+              value={formData.instructions}
               onChange={handleChange}
-              className="form-input"
-              placeholder="Reason for appointment"
+              className="form-textarea"
+              rows="3"
+              placeholder="e.g., Take with food"
             />
           </div>
 
@@ -234,12 +260,12 @@ const AppointmentForm = () => {
         </div>
 
         <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-          <Link to="/appointments" className="btn btn-outline">
+          <Link to="/prescriptions" className="btn btn-outline">
             Cancel
           </Link>
           <button type="submit" className="btn btn-primary" disabled={loading}>
             <Save size={18} />
-            {loading ? 'Saving...' : isEdit ? 'Update Appointment' : 'Schedule Appointment'}
+            {loading ? 'Saving...' : isEdit ? 'Update Prescription' : 'Create Prescription'}
           </button>
         </div>
       </form>
@@ -247,5 +273,5 @@ const AppointmentForm = () => {
   )
 }
 
-export default AppointmentForm
+export default PrescriptionForm
 
