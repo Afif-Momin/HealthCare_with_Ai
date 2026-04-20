@@ -22,21 +22,23 @@ export default function MedicalHistory() {
   const [expanded, setExpanded] = useState({})
 
   // Resolve the Patient table ID for filtering
-  const { patientId, loading: pidLoading } = usePatientId()
+  const { filterPatientId, ready } = usePatientId()
 
   useEffect(() => {
     if (!user) { navigate('/login'); return }
-    if (pidLoading) return // Wait until we have the patient ID
+    if (!ready) return // Wait until we know the scope
     loadAll()
-  }, [user, patientId, pidLoading])
+  }, [user, filterPatientId, ready])
 
   const loadAll = async () => {
     setLoading(true)
+    // filterPatientId: null = load all (Admin/Doctor/Nurse), number = patient's own records
+    const pid = filterPatientId || undefined
     const [r, a, p, ai] = await Promise.allSettled([
-      medicalRecordsAPI.getAll(patientId || undefined),
-      appointmentsAPI.getAll(patientId || undefined),
-      prescriptionsAPI.getAll(patientId || undefined),
-      aiAnalysisAPI.getAll(patientId || undefined),
+      medicalRecordsAPI.getAll(pid),
+      appointmentsAPI.getAll(pid),
+      prescriptionsAPI.getAll(pid),
+      aiAnalysisAPI.getAll(pid),
     ])
     setData({
       records: r.status === 'fulfilled' ? (r.value.data || []) : [],

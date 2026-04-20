@@ -23,18 +23,20 @@ const Prescriptions = () => {
   const [searchParams] = useSearchParams()
   const urlPatientId = searchParams.get('patientId')
 
-  const { patientId: myPatientId, loading: pidLoading, isPatient, canModify } = usePatientId()
-  const effectivePatientId = isPatient ? myPatientId : (urlPatientId ? parseInt(urlPatientId) : undefined)
+  const { filterPatientId, ready, isPatient, canCreate } = usePatientId()
+  const effectiveId = isPatient
+    ? filterPatientId
+    : (urlPatientId ? parseInt(urlPatientId) : filterPatientId) // null = all
 
   useEffect(() => {
-    if (isPatient && pidLoading) return
+    if (!ready) return
     fetchPrescriptions()
-  }, [effectivePatientId, pidLoading])
+  }, [ready, effectiveId])
 
   const fetchPrescriptions = async () => {
     try {
       setLoading(true)
-      const response = await prescriptionsAPI.getAll(effectivePatientId)
+      const response = await prescriptionsAPI.getAll(effectiveId || undefined)
       setPrescriptions(response.data)
     } catch (error) {
       console.error('Error fetching prescriptions:', error)
@@ -126,13 +128,13 @@ const Prescriptions = () => {
                 color: 'var(--text-secondary)', 
                 fontSize: '0.9rem' 
               }}>
-                {patientId ? 'Patient prescriptions' : 'Manage all prescriptions'}
+                {effectiveId ? 'Patient prescriptions' : 'Manage all prescriptions'}
               </p>
             </div>
           </div>
         </div>
         
-        {canModify && (
+        {canCreate && (
           <Link 
             to="/prescriptions/new" 
             className="btn btn-primary"
@@ -233,7 +235,7 @@ const Prescriptions = () => {
           }}>
             Create your first prescription to get started
           </p>
-          {canModify && (
+          {canCreate && (
             <Link to="/prescriptions/new" className="btn btn-primary">
               <Pill size={18} />
               Create First Prescription
@@ -351,7 +353,7 @@ const Prescriptions = () => {
                       >
                         <Eye size={16} />
                       </Link>
-                      {canModify && (
+                      {canCreate && (
                         <>
                           <Link 
                             to={`/prescriptions/${prescription.id}/edit`}
