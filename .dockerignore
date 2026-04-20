@@ -1,0 +1,39 @@
+# ── Version control ───────────────────────────────────────────
+.git
+.gitattributes
+
+# ── Frontend ──────────────────────────────────────────────────
+FrontEnd/node_modules
+FrontEnd/dist
+FrontEnd/.vite
+FrontEnd/coverage
+
+# ── Backend ───────────────────────────────────────────────────
+BackEnd/target
+BackEnd/.mvn/wrapper
+BackEnd/*.log
+
+# ── Python / AI ──────────────────────────────────────────────
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/*.pyd
+AI/**/*.egg-info
+AI/**/.venv
+AI/**/venv
+AI/**/*.pt
+AI/**/*.pth
+AI/**/*.h5
+AI/**/*.keras
+# Large model weight files — mount at runtime instead
+AI/**/*.pkl
+AI/**/*.bin
+
+# ── System files ─────────────────────────────────────────────
+.DS_Store
+**/.DS_Store
+*.swp
+*.swo
+*.env
+.env.*
+!.env.example
