@@ -25,6 +25,17 @@ api.interceptors.request.use(
       config.params = { ...config.params, _t: Date.now() }
     }
 
+    // Attach auth token if available
+    try {
+      const stored = localStorage.getItem('innovaition_user')
+      if (stored) {
+        const user = JSON.parse(stored)
+        if (user?.token) {
+          config.headers['Authorization'] = `Bearer ${user.token}`
+        }
+      }
+    } catch (e) {}
+
     return config
   },
   (error) => {
@@ -141,6 +152,16 @@ export const aiAnalysisAPI = {
 // Health Check API
 export const healthAPI = {
   check: () => api.get('/health'),
+}
+
+// Auth API
+export const authAPI = {
+  register: (data) => api.post('/auth/register', data),
+  login: (data) => api.post('/auth/login', data),
+  verifyOtp: (data) => api.post('/auth/verify-otp', data),
+  resendOtp: (email) => api.post('/auth/resend-otp', { email }),
+  getProfile: (email) => api.get(`/auth/profile/${encodeURIComponent(email)}`),
+  updateProfile: (email, data) => api.put(`/auth/profile/${encodeURIComponent(email)}`, data),
 }
 
 // Early Warning API
