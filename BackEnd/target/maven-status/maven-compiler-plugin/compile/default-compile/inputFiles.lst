@@ -1,4 +1,5 @@
 /Users/yashcomputers/Desktop/HealthCare_with_Ai/BackEnd/src/main/java/com/medicalai/service/AppointmentService.java
+/Users/yashcomputers/Desktop/HealthCare_with_Ai/BackEnd/src/main/java/com/medicalai/dto/RegisterRequest.java
 /Users/yashcomputers/Desktop/HealthCare_with_Ai/BackEnd/src/main/java/com/medicalai/dto/MedicalRecordDTO.java
 /Users/yashcomputers/Desktop/HealthCare_with_Ai/BackEnd/src/main/java/com/medicalai/MedicalAiBackendApplication.java
 /Users/yashcomputers/Desktop/HealthCare_with_Ai/BackEnd/src/main/java/com/medicalai/controller/HealthController.java
@@ -26,6 +27,7 @@
 /Users/yashcomputers/Desktop/HealthCare_with_Ai/BackEnd/src/main/java/com/medicalai/repository/AIAnalysisRepository.java
 /Users/yashcomputers/Desktop/HealthCare_with_Ai/BackEnd/src/main/java/com/medicalai/controller/HospitalConnectorController.java
 /Users/yashcomputers/Desktop/HealthCare_with_Ai/BackEnd/src/main/java/com/medicalai/service/ResendEmailService.java
+/Users/yashcomputers/Desktop/HealthCare_with_Ai/BackEnd/src/main/java/com/medicalai/controller/AuthController.java
 /Users/yashcomputers/Desktop/HealthCare_with_Ai/BackEnd/src/main/java/com/medicalai/entity/AIAnalysis.java
 /Users/yashcomputers/Desktop/HealthCare_with_Ai/BackEnd/src/main/java/com/medicalai/controller/EarlyWarningController.java
 /Users/yashcomputers/Desktop/HealthCare_with_Ai/BackEnd/src/main/java/com/medicalai/controller/PrescriptionController.java
@@ -33,10 +35,16 @@
 /Users/yashcomputers/Desktop/HealthCare_with_Ai/BackEnd/src/main/java/com/medicalai/config/GeminiConfig.java
 /Users/yashcomputers/Desktop/HealthCare_with_Ai/BackEnd/src/main/java/com/medicalai/service/PatientService.java
 /Users/yashcomputers/Desktop/HealthCare_with_Ai/BackEnd/src/main/java/com/medicalai/service/AIAnalysisService.java
+/Users/yashcomputers/Desktop/HealthCare_with_Ai/BackEnd/src/main/java/com/medicalai/config/SecurityConfig.java
 /Users/yashcomputers/Desktop/HealthCare_with_Ai/BackEnd/src/main/java/com/medicalai/entity/SOSEvent.java
+/Users/yashcomputers/Desktop/HealthCare_with_Ai/BackEnd/src/main/java/com/medicalai/dto/LoginRequest.java
+/Users/yashcomputers/Desktop/HealthCare_with_Ai/BackEnd/src/main/java/com/medicalai/service/AuthService.java
 /Users/yashcomputers/Desktop/HealthCare_with_Ai/BackEnd/src/main/java/com/medicalai/service/EmailService.java
+/Users/yashcomputers/Desktop/HealthCare_with_Ai/BackEnd/src/main/java/com/medicalai/entity/User.java
 /Users/yashcomputers/Desktop/HealthCare_with_Ai/BackEnd/src/main/java/com/medicalai/controller/PatientController.java
 /Users/yashcomputers/Desktop/HealthCare_with_Ai/BackEnd/src/main/java/com/medicalai/dto/SOSRequestDTO.java
+/Users/yashcomputers/Desktop/HealthCare_with_Ai/BackEnd/src/main/java/com/medicalai/dto/AuthResponse.java
+/Users/yashcomputers/Desktop/HealthCare_with_Ai/BackEnd/src/main/java/com/medicalai/repository/UserRepository.java
 /Users/yashcomputers/Desktop/HealthCare_with_Ai/BackEnd/src/main/java/com/medicalai/service/TwilioSMSService.java
 /Users/yashcomputers/Desktop/HealthCare_with_Ai/BackEnd/src/main/java/com/medicalai/service/GeminiService.java
 /Users/yashcomputers/Desktop/HealthCare_with_Ai/BackEnd/src/main/java/com/medicalai/dto/AIAnalysisDTO.java
@@ -46,6 +54,7 @@
 /Users/yashcomputers/Desktop/HealthCare_with_Ai/BackEnd/src/main/java/com/medicalai/controller/AIAnalysisController.java
 /Users/yashcomputers/Desktop/HealthCare_with_Ai/BackEnd/src/main/java/com/medicalai/dto/SOSResponseDTO.java
 /Users/yashcomputers/Desktop/HealthCare_with_Ai/BackEnd/src/main/java/com/medicalai/dto/StructuredAnalysisReport.java
+/Users/yashcomputers/Desktop/HealthCare_with_Ai/BackEnd/src/main/java/com/medicalai/dto/OtpVerifyRequest.java
 /Users/yashcomputers/Desktop/HealthCare_with_Ai/BackEnd/src/main/java/com/medicalai/exception/GlobalExceptionHandler.java
 /Users/yashcomputers/Desktop/HealthCare_with_Ai/BackEnd/src/main/java/com/medicalai/entity/Appointment.java
 /Users/yashcomputers/Desktop/HealthCare_with_Ai/BackEnd/src/main/java/com/medicalai/controller/PopulationIntelligenceController.java

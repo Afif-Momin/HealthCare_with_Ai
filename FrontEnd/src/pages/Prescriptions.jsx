@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { 
-  Plus, 
   Eye, 
   Edit, 
   Trash2, 
@@ -11,25 +10,31 @@ import {
   Calendar,
   Activity,
   Repeat,
-  Package
+  Package,
+  Lock
 } from 'lucide-react'
 import { prescriptionsAPI } from '../services/api'
 import { formatDate } from '../utils/dateUtils'
+import { usePatientId } from '../hooks/usePatientId'
 
 const Prescriptions = () => {
   const [prescriptions, setPrescriptions] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchParams] = useSearchParams()
-  const patientId = searchParams.get('patientId')
+  const urlPatientId = searchParams.get('patientId')
+
+  const { patientId: myPatientId, loading: pidLoading, isPatient, canModify } = usePatientId()
+  const effectivePatientId = isPatient ? myPatientId : (urlPatientId ? parseInt(urlPatientId) : undefined)
 
   useEffect(() => {
+    if (isPatient && pidLoading) return
     fetchPrescriptions()
-  }, [patientId])
+  }, [effectivePatientId, pidLoading])
 
   const fetchPrescriptions = async () => {
     try {
       setLoading(true)
-      const response = await prescriptionsAPI.getAll(patientId ? parseInt(patientId) : undefined)
+      const response = await prescriptionsAPI.getAll(effectivePatientId)
       setPrescriptions(response.data)
     } catch (error) {
       console.error('Error fetching prescriptions:', error)
@@ -127,14 +132,21 @@ const Prescriptions = () => {
           </div>
         </div>
         
-        <Link 
-          to="/prescriptions/new" 
-          className="btn btn-primary"
-          style={{ padding: '0.875rem 1.5rem' }}
-        >
-          <Plus size={18} />
-          Create Prescription
-        </Link>
+        {canModify && (
+          <Link 
+            to="/prescriptions/new" 
+            className="btn btn-primary"
+            style={{ padding: '0.875rem 1.5rem' }}
+          >
+            <Pill size={18} />
+            Create Prescription
+          </Link>
+        )}
+        {isPatient && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1rem', background: 'rgba(255,107,107,0.08)', border: '1px solid rgba(255,107,107,0.2)', borderRadius: '10px', fontSize: '0.82rem', color: '#ff6b6b' }}>
+            <Lock size={14} /> Your prescriptions only
+          </div>
+        )}
       </div>
 
       {/* Stats */}
@@ -221,10 +233,12 @@ const Prescriptions = () => {
           }}>
             Create your first prescription to get started
           </p>
-          <Link to="/prescriptions/new" className="btn btn-primary">
-            <Plus size={18} />
-            Create First Prescription
-          </Link>
+          {canModify && (
+            <Link to="/prescriptions/new" className="btn btn-primary">
+              <Pill size={18} />
+              Create First Prescription
+            </Link>
+          )}
         </div>
       ) : (
         <div 
@@ -337,21 +351,25 @@ const Prescriptions = () => {
                       >
                         <Eye size={16} />
                       </Link>
-                      <Link 
-                        to={`/prescriptions/${prescription.id}/edit`}
-                        className="btn btn-ghost"
-                        title="Edit"
-                      >
-                        <Edit size={16} />
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(prescription.id)}
-                        className="btn btn-ghost"
-                        title="Delete"
-                        style={{ color: 'var(--accent-warm)' }}
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      {canModify && (
+                        <>
+                          <Link 
+                            to={`/prescriptions/${prescription.id}/edit`}
+                            className="btn btn-ghost"
+                            title="Edit"
+                          >
+                            <Edit size={16} />
+                          </Link>
+                          <button
+                            onClick={() => handleDelete(prescription.id)}
+                            className="btn btn-ghost"
+                            title="Delete"
+                            style={{ color: 'var(--accent-warm)' }}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>

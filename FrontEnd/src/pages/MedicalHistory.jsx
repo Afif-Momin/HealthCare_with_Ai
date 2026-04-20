@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { medicalRecordsAPI, appointmentsAPI, prescriptionsAPI, aiAnalysisAPI } from '../services/api'
+import { usePatientId } from '../hooks/usePatientId'
 import { FileText, Calendar, Pill, Brain, Activity, Clock, ChevronDown, ChevronUp, AlertCircle, HeartPulse } from 'lucide-react'
 
 const TABS = [
@@ -20,16 +21,22 @@ export default function MedicalHistory() {
   const [error, setError] = useState('')
   const [expanded, setExpanded] = useState({})
 
+  // Resolve the Patient table ID for filtering
+  const { patientId, loading: pidLoading } = usePatientId()
+
   useEffect(() => {
     if (!user) { navigate('/login'); return }
+    if (pidLoading) return // Wait until we have the patient ID
     loadAll()
-  }, [user])
+  }, [user, patientId, pidLoading])
 
   const loadAll = async () => {
     setLoading(true)
     const [r, a, p, ai] = await Promise.allSettled([
-      medicalRecordsAPI.getAll(), appointmentsAPI.getAll(),
-      prescriptionsAPI.getAll(), aiAnalysisAPI.getAll(),
+      medicalRecordsAPI.getAll(patientId || undefined),
+      appointmentsAPI.getAll(patientId || undefined),
+      prescriptionsAPI.getAll(patientId || undefined),
+      aiAnalysisAPI.getAll(patientId || undefined),
     ])
     setData({
       records: r.status === 'fulfilled' ? (r.value.data || []) : [],

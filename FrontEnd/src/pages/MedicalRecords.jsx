@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { 
-  Plus, 
   Eye, 
   Edit, 
   Trash2, 
@@ -10,25 +9,32 @@ import {
   Stethoscope,
   Clock,
   FolderOpen,
-  FilePlus
+  FilePlus,
+  Lock
 } from 'lucide-react'
 import { medicalRecordsAPI } from '../services/api'
 import { formatDate } from '../utils/dateUtils'
+import { usePatientId } from '../hooks/usePatientId'
 
 const MedicalRecords = () => {
   const [records, setRecords] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchParams] = useSearchParams()
-  const patientId = searchParams.get('patientId')
+  const urlPatientId = searchParams.get('patientId')
+
+  // Patient role — fetch only own records
+  const { patientId: myPatientId, loading: pidLoading, isPatient, canModify } = usePatientId()
+  const effectivePatientId = isPatient ? myPatientId : (urlPatientId ? parseInt(urlPatientId) : undefined)
 
   useEffect(() => {
+    if (isPatient && pidLoading) return // wait until we have the patient ID
     fetchRecords()
-  }, [patientId])
+  }, [effectivePatientId, pidLoading])
 
   const fetchRecords = async () => {
     try {
       setLoading(true)
-      const response = await medicalRecordsAPI.getAll(patientId ? parseInt(patientId) : undefined)
+      const response = await medicalRecordsAPI.getAll(effectivePatientId)
       setRecords(response.data)
     } catch (error) {
       console.error('Error fetching records:', error)
@@ -120,14 +126,21 @@ const MedicalRecords = () => {
           </div>
         </div>
         
-        <Link 
-          to="/medical-records/new" 
-          className="btn btn-primary"
-          style={{ padding: '0.875rem 1.5rem' }}
-        >
-          <FilePlus size={18} />
-          Add Record
-        </Link>
+        {canModify && (
+          <Link 
+            to="/medical-records/new" 
+            className="btn btn-primary"
+            style={{ padding: '0.875rem 1.5rem' }}
+          >
+            <FilePlus size={18} />
+            Add Record
+          </Link>
+        )}
+        {isPatient && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1rem', background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.2)', borderRadius: '10px', fontSize: '0.82rem', color: '#00d4ff' }}>
+            <Lock size={14} /> Showing your records only
+          </div>
+        )}
       </div>
 
       {/* Stats */}
@@ -185,10 +198,12 @@ const MedicalRecords = () => {
           }}>
             Add your first medical record to get started
           </p>
-          <Link to="/medical-records/new" className="btn btn-primary">
-            <FilePlus size={18} />
-            Add First Record
-          </Link>
+          {canModify && (
+            <Link to="/medical-records/new" className="btn btn-primary">
+              <FilePlus size={18} />
+              Add First Record
+            </Link>
+          )}
         </div>
       ) : (
         <div 
@@ -291,21 +306,25 @@ const MedicalRecords = () => {
                       >
                         <Eye size={16} />
                       </Link>
-                      <Link 
-                        to={`/medical-records/${record.id}/edit`}
-                        className="btn btn-ghost"
-                        title="Edit"
-                      >
-                        <Edit size={16} />
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(record.id)}
-                        className="btn btn-ghost"
-                        title="Delete"
-                        style={{ color: 'var(--accent-warm)' }}
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      {canModify && (
+                        <>
+                          <Link 
+                            to={`/medical-records/${record.id}/edit`}
+                            className="btn btn-ghost"
+                            title="Edit"
+                          >
+                            <Edit size={16} />
+                          </Link>
+                          <button
+                            onClick={() => handleDelete(record.id)}
+                            className="btn btn-ghost"
+                            title="Delete"
+                            style={{ color: 'var(--accent-warm)' }}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>

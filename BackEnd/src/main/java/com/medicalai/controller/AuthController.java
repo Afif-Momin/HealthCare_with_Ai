@@ -1,7 +1,9 @@
 package com.medicalai.controller;
 
 import com.medicalai.dto.*;
+import com.medicalai.entity.Patient;
 import com.medicalai.entity.User;
+import com.medicalai.repository.PatientRepository;
 import com.medicalai.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -18,6 +21,9 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private PatientRepository patientRepository;
 
     @Value("${admin.email:ismailmansury9737@gmail.com}")
     private String adminEmail;
@@ -44,6 +50,24 @@ public class AuthController {
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
         AuthResponse response = authService.login(request);
         return response.isSuccess() ? ResponseEntity.ok(response) : ResponseEntity.status(401).body(response);
+    }
+
+    /**
+     * Looks up the Patient.id by email so PATIENT users can filter their own data.
+     * The Patient table (patients) is separate from the User auth table (app_users).
+     */
+    @GetMapping("/patient-id/{email}")
+    public ResponseEntity<Map<String, Object>> getPatientId(@PathVariable String email) {
+        Optional<Patient> patient = patientRepository.findByEmail(email.toLowerCase().trim());
+        Map<String, Object> result = new HashMap<>();
+        if (patient.isPresent()) {
+            result.put("patientId", patient.get().getId());
+            result.put("found", true);
+        } else {
+            result.put("patientId", null);
+            result.put("found", false);
+        }
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/profile/{email}")

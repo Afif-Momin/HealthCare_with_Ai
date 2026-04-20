@@ -74,6 +74,8 @@ export const authAPI = {
   resendOtp: (email) => api.post('/auth/resend-otp', { email }),
   getProfile: (email) => api.get(`/auth/profile/${encodeURIComponent(email)}`),
   updateProfile: (email, data) => api.put(`/auth/profile/${encodeURIComponent(email)}`, data),
+  // Looks up Patient table ID for a logged-in patient (for data isolation)
+  getPatientId: (email) => api.get(`/auth/patient-id/${encodeURIComponent(email)}`),
 }
 
 // ── Patients API ─────────────────────────────────────────────────────────────

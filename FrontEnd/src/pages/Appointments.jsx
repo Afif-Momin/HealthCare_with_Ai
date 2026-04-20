@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { 
-  Plus, 
   Eye, 
   Edit, 
   Trash2, 
@@ -11,25 +10,31 @@ import {
   Stethoscope,
   Building,
   Activity,
-  CalendarPlus
+  CalendarPlus,
+  Lock
 } from 'lucide-react'
 import { appointmentsAPI } from '../services/api'
 import { formatDateTime } from '../utils/dateUtils'
+import { usePatientId } from '../hooks/usePatientId'
 
 const Appointments = () => {
   const [appointments, setAppointments] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchParams] = useSearchParams()
-  const patientId = searchParams.get('patientId')
+  const urlPatientId = searchParams.get('patientId')
+
+  const { patientId: myPatientId, loading: pidLoading, isPatient, canModify } = usePatientId()
+  const effectivePatientId = isPatient ? myPatientId : (urlPatientId ? parseInt(urlPatientId) : undefined)
 
   useEffect(() => {
+    if (isPatient && pidLoading) return
     fetchAppointments()
-  }, [patientId])
+  }, [effectivePatientId, pidLoading])
 
   const fetchAppointments = async () => {
     try {
       setLoading(true)
-      const response = await appointmentsAPI.getAll(patientId ? parseInt(patientId) : undefined)
+      const response = await appointmentsAPI.getAll(effectivePatientId)
       setAppointments(response.data)
     } catch (error) {
       console.error('Error fetching appointments:', error)
@@ -133,14 +138,21 @@ const Appointments = () => {
           </div>
         </div>
         
-        <Link 
-          to="/appointments/new" 
-          className="btn btn-primary"
-          style={{ padding: '0.875rem 1.5rem' }}
-        >
-          <CalendarPlus size={18} />
-          Schedule Appointment
-        </Link>
+        {canModify && (
+          <Link 
+            to="/appointments/new" 
+            className="btn btn-primary"
+            style={{ padding: '0.875rem 1.5rem' }}
+          >
+            <CalendarPlus size={18} />
+            Schedule Appointment
+          </Link>
+        )}
+        {isPatient && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1rem', background: 'rgba(255,215,0,0.08)', border: '1px solid rgba(255,215,0,0.2)', borderRadius: '10px', fontSize: '0.82rem', color: '#ffd700' }}>
+            <Lock size={14} /> Your appointments only
+          </div>
+        )}
       </div>
 
       {/* Stats */}
@@ -218,10 +230,12 @@ const Appointments = () => {
           }}>
             Schedule your first appointment to get started
           </p>
-          <Link to="/appointments/new" className="btn btn-primary">
-            <CalendarPlus size={18} />
-            Schedule First Appointment
-          </Link>
+          {canModify && (
+            <Link to="/appointments/new" className="btn btn-primary">
+              <CalendarPlus size={18} />
+              Schedule First Appointment
+            </Link>
+          )}
         </div>
       ) : (
         <div 
@@ -310,21 +324,25 @@ const Appointments = () => {
                       >
                         <Eye size={16} />
                       </Link>
-                      <Link 
-                        to={`/appointments/${appointment.id}/edit`}
-                        className="btn btn-ghost"
-                        title="Edit"
-                      >
-                        <Edit size={16} />
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(appointment.id)}
-                        className="btn btn-ghost"
-                        title="Delete"
-                        style={{ color: 'var(--accent-warm)' }}
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      {canModify && (
+                        <>
+                          <Link 
+                            to={`/appointments/${appointment.id}/edit`}
+                            className="btn btn-ghost"
+                            title="Edit"
+                          >
+                            <Edit size={16} />
+                          </Link>
+                          <button
+                            onClick={() => handleDelete(appointment.id)}
+                            className="btn btn-ghost"
+                            title="Delete"
+                            style={{ color: 'var(--accent-warm)' }}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>
