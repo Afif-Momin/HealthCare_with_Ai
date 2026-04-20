@@ -139,7 +139,7 @@ const Layout = ({ children }) => {
                   WebkitTextFillColor: 'transparent',
                   letterSpacing: '-0.02em',
                 }}>
-                  InnovAItion
+                  Healthcare AI
                 </h1>
                 <p style={{
                   fontSize: '0.7rem',
@@ -583,7 +583,7 @@ const Layout = ({ children }) => {
             gap: '0.5rem',
           }}>
             <Sparkles size={14} color="var(--accent-primary)" />
-            Powered by InnovAItion Healthcare AI
+            Powered by Healthcare AI Healthcare AI
           </p>
           <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
             © 2026 All rights reserved

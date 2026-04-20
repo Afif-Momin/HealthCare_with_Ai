@@ -177,4 +177,4 @@ curl http://localhost:8000/health
 
 ## 📜 License
 
-This project is part of the InnovAItion-2026 medical AI initiative.
+This project is part of the Healthcare AI-2026 medical AI initiative.

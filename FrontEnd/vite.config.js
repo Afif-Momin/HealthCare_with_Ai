@@ -7,7 +7,7 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'https://innovaition-backend.onrender.com',
+        target: 'https://Healthcare AI-backend.onrender.com',
         changeOrigin: true
       }
     }

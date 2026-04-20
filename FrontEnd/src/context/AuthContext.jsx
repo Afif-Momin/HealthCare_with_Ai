@@ -2,31 +2,11 @@ import { createContext, useContext, useState, useEffect } from 'react'
 
 const AuthContext = createContext(null)
 
-export const ROLES = {
-  ADMIN: 'ADMIN',
-  DOCTOR: 'DOCTOR',
-  NURSE: 'NURSE',
-  PATIENT: 'PATIENT',
-}
-
-// Role-based permissions
 export const ROLE_PERMISSIONS = {
-  ADMIN: [
-    '/', '/patients', '/medical-records', '/appointments', '/prescriptions',
-    '/ai-analysis', '/advanced-detection', '/voice-consultation',
-    '/population-intelligence', '/outbreak-detection', '/profile'
-  ],
-  DOCTOR: [
-    '/', '/patients', '/medical-records', '/appointments', '/prescriptions',
-    '/ai-analysis', '/advanced-detection', '/voice-consultation',
-    '/population-intelligence', '/outbreak-detection', '/profile'
-  ],
-  NURSE: [
-    '/', '/patients', '/medical-records', '/appointments', '/prescriptions', '/profile'
-  ],
-  PATIENT: [
-    '/', '/medical-records', '/appointments', '/prescriptions', '/profile'
-  ],
+  ADMIN: ['/', '/patients', '/medical-records', '/appointments', '/prescriptions', '/ai-analysis', '/advanced-detection', '/voice-consultation', '/population-intelligence', '/outbreak-detection', '/profile', '/medical-history'],
+  DOCTOR: ['/', '/patients', '/medical-records', '/appointments', '/prescriptions', '/ai-analysis', '/advanced-detection', '/voice-consultation', '/population-intelligence', '/outbreak-detection', '/profile'],
+  NURSE: ['/', '/patients', '/medical-records', '/appointments', '/prescriptions', '/profile', '/medical-history'],
+  PATIENT: ['/', '/medical-records', '/appointments', '/prescriptions', '/profile', '/medical-history'],
 }
 
 export const ROLE_SIDEBAR = {
@@ -86,12 +66,9 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Restore from localStorage
     try {
       const stored = localStorage.getItem('innovaition_user')
-      if (stored) {
-        setUser(JSON.parse(stored))
-      }
+      if (stored) setUser(JSON.parse(stored))
     } catch (e) {
       localStorage.removeItem('innovaition_user')
     }
@@ -109,18 +86,10 @@ export function AuthProvider({ children }) {
   }
 
   const hasRole = (role) => user?.role === role
-
-  const canAccess = (path) => {
-    if (!user) return false
-    const perms = ROLE_PERMISSIONS[user.role] || []
-    // Check if any permission is a prefix of the path
-    return perms.some(p => p === '/' ? path === '/' : path.startsWith(p))
-  }
-
   const isAuthenticated = !!user
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, hasRole, canAccess, isAuthenticated, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, hasRole, isAuthenticated, loading }}>
       {children}
     </AuthContext.Provider>
   )

@@ -26,23 +26,17 @@ public class AuthResponse {
     }
 
     public String getToken() { return token; }
-    public void setToken(String token) { this.token = token; }
-
+    public void setToken(String v) { this.token = v; }
     public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
-
+    public void setRole(String v) { this.role = v; }
     public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-
+    public void setEmail(String v) { this.email = v; }
     public String getFullName() { return fullName; }
-    public void setFullName(String fullName) { this.fullName = fullName; }
-
+    public void setFullName(String v) { this.fullName = v; }
     public Long getUserId() { return userId; }
-    public void setUserId(Long userId) { this.userId = userId; }
-
+    public void setUserId(Long v) { this.userId = v; }
     public String getMessage() { return message; }
-    public void setMessage(String message) { this.message = message; }
-
+    public void setMessage(String v) { this.message = v; }
     public boolean isSuccess() { return success; }
-    public void setSuccess(boolean success) { this.success = success; }
+    public void setSuccess(boolean v) { this.success = v; }
 }

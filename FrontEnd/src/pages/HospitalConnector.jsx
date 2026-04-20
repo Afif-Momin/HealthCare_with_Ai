@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useParams, Link, useSearchParams } from 'react-router-dom'
-import { 
-  ArrowLeft, 
-  MapPin, 
-  Phone, 
-  Star, 
-  Navigation, 
+import {
+  ArrowLeft,
+  MapPin,
+  Phone,
+  Star,
+  Navigation,
   ExternalLink,
   Search,
   Filter,
@@ -101,7 +101,7 @@ const HospitalConnector = () => {
       if (city) queryParts.push(city)
       if (state) queryParts.push(state)
       if (country) queryParts.push(country)
-      
+
       const query = queryParts.join(', ')
       if (!query) return null
 
@@ -109,11 +109,11 @@ const HospitalConnector = () => {
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`,
         {
           headers: {
-            'User-Agent': 'InnovAItion-Medical-App'
+            'User-Agent': 'Healthcare AI-Medical-App'
           }
         }
       )
-      
+
       const data = await response.json()
       if (data && data.length > 0) {
         return {
@@ -133,7 +133,7 @@ const HospitalConnector = () => {
       setLoading(true)
       setError(null)
       const analysisType = searchParams.get('analysisType') || 'General Analysis'
-      
+
       // First, get patient data and geocode their location
       let patientLocation = null
       if (patient) {
@@ -152,13 +152,13 @@ const HospitalConnector = () => {
 
       // Pass patient location coordinates to backend
       const response = await hospitalConnectorAPI.findNearest(
-        parseInt(patientId), 
+        parseInt(patientId),
         analysisType,
         patientLocation?.lat,
         patientLocation?.lng
       )
       setHospitals(response.data)
-      
+
       // Update map center with patient coordinates from backend or geocoded location
       if (patientLocation) {
         setMapCenter(patientLocation)
@@ -184,7 +184,7 @@ const HospitalConnector = () => {
   // Filter and sort hospitals
   const filteredHospitals = useMemo(() => {
     if (!hospitals?.hospitals) return []
-    
+
     let filtered = hospitals.hospitals.filter(hospital => {
       if (!searchQuery) return true
       const query = searchQuery.toLowerCase()
@@ -231,7 +231,7 @@ const HospitalConnector = () => {
     }
 
     if (!window.confirm(
-      isEmergency 
+      isEmergency
         ? `🚨 EMERGENCY REQUEST: Send patient profile to ${hospital.name}?\n\nThis will send all patient data and latest analysis with HIGH PRIORITY.`
         : `Send patient profile to ${hospital.name}?\n\nThis will include patient information and latest AI analysis.`
     )) {
@@ -246,7 +246,7 @@ const HospitalConnector = () => {
         hospital.email,
         isEmergency
       )
-      
+
       if (response.data.success) {
         setSendStatus({ type: 'success', message: response.data.message })
         setTimeout(() => setSendStatus(null), 5000)
@@ -256,9 +256,9 @@ const HospitalConnector = () => {
       }
     } catch (error) {
       console.error('Error sending profile:', error)
-      setSendStatus({ 
-        type: 'error', 
-        message: error.response?.data?.message || 'Failed to send profile. Please try again.' 
+      setSendStatus({
+        type: 'error',
+        message: error.response?.data?.message || 'Failed to send profile. Please try again.'
       })
       setTimeout(() => setSendStatus(null), 5000)
     } finally {
@@ -311,7 +311,7 @@ const HospitalConnector = () => {
         console.log('Leaflet not loaded yet')
         return
       }
-      
+
       if (!hospitals?.hospitals || hospitals.hospitals.length === 0) {
         console.log('No hospitals data available')
         return
@@ -344,7 +344,7 @@ const HospitalConnector = () => {
           zoomControl: true,
           attributionControl: true
         }).setView([mapCenter.lat, mapCenter.lng], 12)
-        
+
         mapInstance = map
         mapContainer._leafletMap = map
 
@@ -373,12 +373,12 @@ const HospitalConnector = () => {
             console.warn('Hospital missing coordinates:', hospital.name, hospital)
             return
           }
-          
+
           console.log(`Adding marker for ${hospital.name} at (${hospital.latitude}, ${hospital.longitude})`)
 
           const isSelected = selectedHospital === index
           const specialtyColor = getSpecialtyColor(hospital.specialty)
-          
+
           const hospitalIcon = window.L.divIcon({
             className: 'hospital-marker',
             html: `<div style="width: ${isSelected ? '32px' : '24px'}; height: ${isSelected ? '32px' : '24px'}; background: ${specialtyColor}; border: 3px solid white; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;">
@@ -411,7 +411,7 @@ const HospitalConnector = () => {
         setTimeout(() => {
           map.invalidateSize()
           console.log('Map initialized with', markers.length, 'hospital markers')
-          
+
           // Fit map to show all markers after a short delay to ensure markers are rendered
           if (markers.length > 0) {
             const bounds = window.L.latLngBounds(
@@ -452,10 +452,10 @@ const HospitalConnector = () => {
 
   if (loading) {
     return (
-      <div style={{ 
-        display: 'flex', 
+      <div style={{
+        display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center', 
+        alignItems: 'center',
         justifyContent: 'center',
         minHeight: '60vh',
         gap: '1rem'
@@ -471,11 +471,11 @@ const HospitalConnector = () => {
   if (error || !hospitals) {
     return (
       <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
-        <Link 
-          to={`/patients/${patientId}`} 
-          style={{ 
-            display: 'inline-flex', 
-            alignItems: 'center', 
+        <Link
+          to={`/patients/${patientId}`}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
             gap: '0.5rem',
             color: 'var(--text-secondary)',
             textDecoration: 'none',
@@ -488,8 +488,8 @@ const HospitalConnector = () => {
           <ArrowLeft size={18} />
           Back to Patient
         </Link>
-        <div className="card" style={{ 
-          textAlign: 'center', 
+        <div className="card" style={{
+          textAlign: 'center',
           padding: '3rem',
           background: 'var(--bg-card)',
           border: '1px solid var(--border-subtle)'
@@ -524,11 +524,11 @@ const HospitalConnector = () => {
   return (
     <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '2rem' }}>
       {/* Back Button */}
-      <Link 
-        to={`/patients/${patientId}`} 
-        style={{ 
-          display: 'inline-flex', 
-          alignItems: 'center', 
+      <Link
+        to={`/patients/${patientId}`}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
           gap: '0.5rem',
           color: 'var(--text-secondary)',
           textDecoration: 'none',
@@ -562,7 +562,7 @@ const HospitalConnector = () => {
           background: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%)',
           animation: 'pulse 3s ease-in-out infinite'
         }} />
-        
+
         <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', color: 'white' }}>
           <div style={{
             display: 'inline-flex',
@@ -577,17 +577,17 @@ const HospitalConnector = () => {
           }}>
             <MapPin size={40} color="white" />
           </div>
-          <h1 style={{ 
-            margin: 0, 
-            fontSize: '2.5rem', 
+          <h1 style={{
+            margin: 0,
+            fontSize: '2.5rem',
             fontWeight: '800',
             marginBottom: '0.5rem'
           }}>
             Find Hospitals & Specialists
           </h1>
-          <p style={{ 
-            margin: 0, 
-            opacity: 0.95, 
+          <p style={{
+            margin: 0,
+            opacity: 0.95,
             fontSize: '1.125rem',
             display: 'flex',
             alignItems: 'center',
@@ -613,9 +613,9 @@ const HospitalConnector = () => {
             )}
           </p>
           {patient && (patient.address || patient.city) && (
-            <p style={{ 
-              margin: '0.5rem 0 0 0', 
-              opacity: 0.85, 
+            <p style={{
+              margin: '0.5rem 0 0 0',
+              opacity: 0.85,
               fontSize: '0.875rem',
               display: 'flex',
               alignItems: 'center',
@@ -639,8 +639,8 @@ const HospitalConnector = () => {
         alignItems: 'center'
       }}>
         <div style={{ flex: 1, minWidth: '250px', position: 'relative' }}>
-          <Search 
-            size={20} 
+          <Search
+            size={20}
             style={{
               position: 'absolute',
               left: '1rem',
@@ -741,7 +741,7 @@ const HospitalConnector = () => {
       {/* Map and Hospitals Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
         {/* Map Container */}
-        <div className="card" style={{ 
+        <div className="card" style={{
           padding: 0,
           background: 'var(--bg-card)',
           border: '1px solid var(--border-subtle)',
@@ -750,10 +750,10 @@ const HospitalConnector = () => {
           height: '600px',
           position: 'relative'
         }}>
-          <div 
-            id="hospital-map" 
-            style={{ 
-              width: '100%', 
+          <div
+            id="hospital-map"
+            style={{
+              width: '100%',
               height: '100%',
               minHeight: '600px',
               borderRadius: '16px',
@@ -777,7 +777,7 @@ const HospitalConnector = () => {
         </div>
 
         {/* Hospitals List */}
-        <div style={{ 
+        <div style={{
           maxHeight: '600px',
           overflowY: 'auto',
           display: 'flex',
@@ -803,8 +803,8 @@ const HospitalConnector = () => {
             </div>
           )}
           {filteredHospitals.length === 0 ? (
-            <div className="card" style={{ 
-              textAlign: 'center', 
+            <div className="card" style={{
+              textAlign: 'center',
               padding: '3rem',
               background: 'var(--bg-card)',
               border: '1px solid var(--border-subtle)'
@@ -822,32 +822,32 @@ const HospitalConnector = () => {
               const specialtyColor = getSpecialtyColor(hospital.specialty)
               const isSelected = selectedHospital === index
               const isNearest = index === 0 && sortBy === 'distance'
-              
+
               return (
-                <div 
+                <div
                   key={hospital.id || index}
                   className="card"
                   style={{
                     padding: '1.5rem',
-                    background: isSelected 
-                      ? `linear-gradient(135deg, ${specialtyColor}10, ${specialtyColor}05)` 
+                    background: isSelected
+                      ? `linear-gradient(135deg, ${specialtyColor}10, ${specialtyColor}05)`
                       : isNearest
-                      ? `linear-gradient(135deg, #10b98110, #10b98105)`
-                      : 'var(--bg-card)',
-                    border: isSelected 
-                      ? `2px solid ${specialtyColor}` 
+                        ? `linear-gradient(135deg, #10b98110, #10b98105)`
+                        : 'var(--bg-card)',
+                    border: isSelected
+                      ? `2px solid ${specialtyColor}`
                       : isNearest
-                      ? `2px solid #10b981`
-                      : '1px solid var(--border-subtle)',
+                        ? `2px solid #10b981`
+                        : '1px solid var(--border-subtle)',
                     borderRadius: '16px',
                     cursor: 'pointer',
                     transition: 'all 0.3s',
                     transform: isSelected ? 'translateX(4px)' : 'translateX(0)',
-                    boxShadow: isSelected 
-                      ? `0 8px 24px ${specialtyColor}20` 
+                    boxShadow: isSelected
+                      ? `0 8px 24px ${specialtyColor}20`
                       : isNearest
-                      ? `0 4px 16px #10b98120`
-                      : '0 2px 8px rgba(0,0,0,0.05)',
+                        ? `0 4px 16px #10b98120`
+                        : '0 2px 8px rgba(0,0,0,0.05)',
                     position: 'relative'
                   }}
                   onClick={() => {
@@ -893,41 +893,41 @@ const HospitalConnector = () => {
 
                     {/* Hospital Info */}
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ 
-                        display: 'flex', 
-                        alignItems: 'flex-start', 
-                        justifyContent: 'space-between', 
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        justifyContent: 'space-between',
                         marginBottom: '0.5rem',
                         gap: '1rem',
                         flexWrap: 'wrap'
                       }}>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <h3 style={{ 
-                            margin: 0, 
-                            fontSize: '1.125rem', 
-                            fontWeight: '700', 
+                          <h3 style={{
+                            margin: 0,
+                            fontSize: '1.125rem',
+                            fontWeight: '700',
                             color: 'var(--text-primary)',
                             marginBottom: '0.25rem'
                           }}>
                             {hospital.name}
                           </h3>
-                          <div style={{ 
-                            display: 'flex', 
-                            alignItems: 'center', 
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
                             gap: '0.5rem',
                             flexWrap: 'wrap',
                             marginTop: '0.25rem'
                           }}>
                             {hospital.rating && (
-                              <div style={{ 
-                                display: 'flex', 
-                                alignItems: 'center', 
+                              <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
                                 gap: '0.25rem',
                                 color: '#fbbf24'
                               }}>
                                 <Star size={14} fill="#fbbf24" />
-                                <span style={{ 
-                                  fontSize: '0.875rem', 
+                                <span style={{
+                                  fontSize: '0.875rem',
                                   fontWeight: '600',
                                   color: 'var(--text-primary)'
                                 }}>
@@ -938,7 +938,7 @@ const HospitalConnector = () => {
                             {hospital.specialty && (
                               <>
                                 <span style={{ color: 'var(--text-secondary)' }}>•</span>
-                                <span style={{ 
+                                <span style={{
                                   fontSize: '0.875rem',
                                   color: specialtyColor,
                                   fontWeight: '600'
@@ -962,9 +962,9 @@ const HospitalConnector = () => {
                         </div>
                       </div>
 
-                      <div style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
                         gap: '0.5rem',
                         marginTop: '0.75rem',
                         color: 'var(--text-secondary)',
@@ -975,9 +975,9 @@ const HospitalConnector = () => {
                       </div>
 
                       {hospital.email && (
-                        <div style={{ 
-                          display: 'flex', 
-                          alignItems: 'center', 
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
                           gap: '0.5rem',
                           marginTop: '0.5rem',
                           color: 'var(--text-secondary)',
@@ -989,7 +989,7 @@ const HospitalConnector = () => {
                       )}
 
                       {hospital.services && (
-                        <div style={{ 
+                        <div style={{
                           marginTop: '0.75rem',
                           padding: '0.75rem',
                           background: 'var(--bg)',
@@ -1002,8 +1002,8 @@ const HospitalConnector = () => {
                       )}
 
                       {isSelected && (
-                        <div style={{ 
-                          marginTop: '1rem', 
+                        <div style={{
+                          marginTop: '1rem',
                           paddingTop: '1rem',
                           borderTop: `1px solid ${specialtyColor}30`,
                           animation: 'fadeIn 0.3s ease'
@@ -1014,7 +1014,7 @@ const HospitalConnector = () => {
                               padding: '0.75rem 1rem',
                               marginBottom: '1rem',
                               borderRadius: '10px',
-                              background: sendStatus.type === 'success' 
+                              background: sendStatus.type === 'success'
                                 ? 'linear-gradient(135deg, #10b98115, #05966915)'
                                 : 'linear-gradient(135deg, #ef444415, #dc262615)',
                               border: `1px solid ${sendStatus.type === 'success' ? '#10b981' : '#ef4444'}`,
@@ -1031,7 +1031,7 @@ const HospitalConnector = () => {
                           )}
 
                           {/* Action Buttons */}
-                          <div style={{ 
+                          <div style={{
                             display: 'flex',
                             gap: '0.75rem',
                             flexWrap: 'wrap'
@@ -1186,7 +1186,7 @@ const HospitalConnector = () => {
                               More Info
                             </a>
                           </div>
-                          
+
                           {/* Hospital Contact Info */}
                           {hospital.email && (
                             <div style={{
@@ -1216,13 +1216,13 @@ const HospitalConnector = () => {
       </div>
 
       {/* Summary Stats */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
         gap: '1.5rem'
       }}>
-        <div className="card" style={{ 
-          textAlign: 'center', 
+        <div className="card" style={{
+          textAlign: 'center',
           padding: '1.5rem',
           background: 'var(--bg-card)',
           border: '1px solid var(--border-subtle)',
@@ -1236,8 +1236,8 @@ const HospitalConnector = () => {
             Hospitals Found
           </div>
         </div>
-        <div className="card" style={{ 
-          textAlign: 'center', 
+        <div className="card" style={{
+          textAlign: 'center',
           padding: '1.5rem',
           background: 'var(--bg-card)',
           border: '1px solid var(--border-subtle)',
@@ -1251,8 +1251,8 @@ const HospitalConnector = () => {
             Nearest Hospital
           </div>
         </div>
-        <div className="card" style={{ 
-          textAlign: 'center', 
+        <div className="card" style={{
+          textAlign: 'center',
           padding: '1.5rem',
           background: 'var(--bg-card)',
           border: '1px solid var(--border-subtle)',
@@ -1260,7 +1260,7 @@ const HospitalConnector = () => {
         }}>
           <Star size={32} color="#fbbf24" style={{ marginBottom: '0.5rem' }} />
           <div style={{ fontSize: '2rem', fontWeight: '800', color: '#fbbf24', marginBottom: '0.25rem' }}>
-            {filteredHospitals.length > 0 
+            {filteredHospitals.length > 0
               ? (filteredHospitals.reduce((sum, h) => sum + (h.rating || 0), 0) / filteredHospitals.length).toFixed(1)
               : 'N/A'}
           </div>

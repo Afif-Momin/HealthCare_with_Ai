@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { 
-  Users, 
-  FileText, 
-  Calendar, 
-  Pill, 
+import {
+  Users,
+  FileText,
+  Calendar,
+  Pill,
   Brain,
   ArrowRight,
   TrendingUp,
@@ -74,50 +74,50 @@ const Dashboard = () => {
   }, [])
 
   const statCards = [
-    { 
-      title: 'Total Patients', 
-      value: stats.patients, 
-      icon: Users, 
+    {
+      title: 'Total Patients',
+      value: stats.patients,
+      icon: Users,
       gradient: 'linear-gradient(135deg, #7c3aed, #a78bfa)',
       glow: 'rgba(124, 58, 237, 0.3)',
       link: '/patients',
       change: '+12%',
       trend: 'up'
     },
-    { 
-      title: 'Medical Records', 
-      value: stats.medicalRecords, 
-      icon: FileText, 
+    {
+      title: 'Medical Records',
+      value: stats.medicalRecords,
+      icon: FileText,
       gradient: 'linear-gradient(135deg, #00ff88, #00d4ff)',
       glow: 'rgba(0, 255, 136, 0.3)',
       link: '/medical-records',
       change: '+8%',
       trend: 'up'
     },
-    { 
-      title: 'Appointments', 
-      value: stats.appointments, 
-      icon: Calendar, 
+    {
+      title: 'Appointments',
+      value: stats.appointments,
+      icon: Calendar,
       gradient: 'linear-gradient(135deg, #ffd700, #ff6b6b)',
       glow: 'rgba(255, 215, 0, 0.3)',
       link: '/appointments',
       change: '+24%',
       trend: 'up'
     },
-    { 
-      title: 'Prescriptions', 
-      value: stats.prescriptions, 
-      icon: Pill, 
+    {
+      title: 'Prescriptions',
+      value: stats.prescriptions,
+      icon: Pill,
       gradient: 'linear-gradient(135deg, #ff6b6b, #ff8a8a)',
       glow: 'rgba(255, 107, 107, 0.3)',
       link: '/prescriptions',
       change: '+5%',
       trend: 'up'
     },
-    { 
-      title: 'AI Analyses', 
-      value: stats.aiAnalyses, 
-      icon: Brain, 
+    {
+      title: 'AI Analyses',
+      value: stats.aiAnalyses,
+      icon: Brain,
       gradient: 'linear-gradient(135deg, #00d4ff, #7c3aed)',
       glow: 'rgba(0, 212, 255, 0.3)',
       link: '/ai-analysis',
@@ -206,17 +206,17 @@ const Dashboard = () => {
         }} />
 
         <div style={{ position: 'relative', zIndex: 1 }}>
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'flex-start', 
+          <div style={{
+            display: 'flex',
+            alignItems: 'flex-start',
             justifyContent: 'space-between',
             flexWrap: 'wrap',
             gap: '2rem',
           }}>
             <div>
-              <div style={{ 
-                display: 'inline-flex', 
-                alignItems: 'center', 
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
                 gap: '0.5rem',
                 background: 'rgba(0, 212, 255, 0.15)',
                 border: '1px solid rgba(0, 212, 255, 0.3)',
@@ -225,9 +225,9 @@ const Dashboard = () => {
                 marginBottom: '1rem',
               }}>
                 <Sparkles size={14} color="#00d4ff" />
-                <span style={{ 
-                  fontSize: '0.75rem', 
-                  fontWeight: '600', 
+                <span style={{
+                  fontSize: '0.75rem',
+                  fontWeight: '600',
                   color: '#00d4ff',
                   textTransform: 'uppercase',
                   letterSpacing: '0.05em'
@@ -235,9 +235,9 @@ const Dashboard = () => {
                   AI-Powered Healthcare
                 </span>
               </div>
-              
-              <h1 style={{ 
-                fontSize: 'clamp(2rem, 4vw, 3rem)', 
+
+              <h1 style={{
+                fontSize: 'clamp(2rem, 4vw, 3rem)',
                 fontWeight: '800',
                 marginBottom: '0.75rem',
                 lineHeight: '1.1',
@@ -248,11 +248,11 @@ const Dashboard = () => {
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                 }}>
-                  InnovAItion
+                  Healthcare AI
                 </span>
               </h1>
-              <p style={{ 
-                color: 'var(--text-secondary)', 
+              <p style={{
+                color: 'var(--text-secondary)',
                 fontSize: '1.1rem',
                 maxWidth: '500px',
                 lineHeight: '1.6',
@@ -269,8 +269,8 @@ const Dashboard = () => {
               backdropFilter: 'blur(10px)',
               textAlign: 'right',
             }}>
-              <p style={{ 
-                fontSize: '0.7rem', 
+              <p style={{
+                fontSize: '0.7rem',
                 color: 'var(--text-muted)',
                 textTransform: 'uppercase',
                 letterSpacing: '0.1em',
@@ -278,27 +278,27 @@ const Dashboard = () => {
               }}>
                 Current Time
               </p>
-              <p style={{ 
-                fontSize: '2rem', 
+              <p style={{
+                fontSize: '2rem',
                 fontWeight: '700',
                 fontFamily: 'var(--font-mono)',
                 color: 'var(--accent-primary)',
                 letterSpacing: '0.02em',
               }}>
-                {time.toLocaleTimeString('en-US', { 
-                  hour: '2-digit', 
+                {time.toLocaleTimeString('en-US', {
+                  hour: '2-digit',
                   minute: '2-digit',
-                  hour12: true 
+                  hour12: true
                 })}
               </p>
-              <p style={{ 
-                fontSize: '0.85rem', 
+              <p style={{
+                fontSize: '0.85rem',
                 color: 'var(--text-secondary)',
               }}>
-                {time.toLocaleDateString('en-US', { 
+                {time.toLocaleDateString('en-US', {
                   weekday: 'long',
-                  month: 'short', 
-                  day: 'numeric' 
+                  month: 'short',
+                  day: 'numeric'
                 })}
               </p>
             </div>
@@ -308,16 +308,16 @@ const Dashboard = () => {
 
       {/* Quick Actions */}
       <div style={{ marginBottom: '2rem' }}>
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
           gap: '0.75rem',
           marginBottom: '1rem',
         }}>
           <Zap size={20} color="var(--accent-primary)" />
           <h2 style={{ fontSize: '1.1rem', fontWeight: '600' }}>Quick Actions</h2>
         </div>
-        
+
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
@@ -366,8 +366,8 @@ const Dashboard = () => {
                 }}>
                   <Icon size={22} color={action.color} />
                 </div>
-                <span style={{ 
-                  fontSize: '0.9rem', 
+                <span style={{
+                  fontSize: '0.9rem',
                   fontWeight: '500',
                   color: 'var(--text-primary)'
                 }}>
@@ -381,9 +381,9 @@ const Dashboard = () => {
 
       {/* Stats Grid */}
       <div style={{ marginBottom: '2rem' }}>
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
           gap: '0.75rem',
           marginBottom: '1rem',
         }}>
@@ -391,9 +391,9 @@ const Dashboard = () => {
           <h2 style={{ fontSize: '1.1rem', fontWeight: '600' }}>Overview</h2>
         </div>
 
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', 
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
           gap: '1.25rem',
         }}>
           {statCards.map((card, index) => {
@@ -402,7 +402,7 @@ const Dashboard = () => {
               <Link
                 key={card.title}
                 to={card.link}
-                style={{ 
+                style={{
                   textDecoration: 'none',
                   animation: 'fadeInUp 0.5s ease forwards',
                   animationDelay: `${(index + 4) * 0.1}s`,
@@ -419,16 +419,16 @@ const Dashboard = () => {
                   transition: 'all 0.3s ease',
                   cursor: 'pointer',
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-4px)'
-                  e.currentTarget.style.boxShadow = `0 0 40px ${card.glow}`
-                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)'
-                  e.currentTarget.style.boxShadow = 'none'
-                  e.currentTarget.style.borderColor = 'var(--border-subtle)'
-                }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-4px)'
+                    e.currentTarget.style.boxShadow = `0 0 40px ${card.glow}`
+                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)'
+                    e.currentTarget.style.boxShadow = 'none'
+                    e.currentTarget.style.borderColor = 'var(--border-subtle)'
+                  }}
                 >
                   {/* Gradient accent */}
                   <div style={{
@@ -439,10 +439,10 @@ const Dashboard = () => {
                     height: '3px',
                     background: card.gradient,
                   }} />
-                  
-                  <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'flex-start', 
+
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
                     justifyContent: 'space-between',
                     marginBottom: '1rem',
                   }}>
@@ -468,8 +468,8 @@ const Dashboard = () => {
                       padding: '0.25rem 0.625rem',
                     }}>
                       <TrendingUp size={12} color="#00ff88" />
-                      <span style={{ 
-                        fontSize: '0.75rem', 
+                      <span style={{
+                        fontSize: '0.75rem',
                         fontWeight: '600',
                         color: '#00ff88'
                       }}>
@@ -478,8 +478,8 @@ const Dashboard = () => {
                     </div>
                   </div>
 
-                  <p style={{ 
-                    fontSize: '0.8rem', 
+                  <p style={{
+                    fontSize: '0.8rem',
                     color: 'var(--text-muted)',
                     marginBottom: '0.375rem',
                     textTransform: 'uppercase',
@@ -488,8 +488,8 @@ const Dashboard = () => {
                     {card.title}
                   </p>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
-                    <h3 style={{ 
-                      fontSize: '2.5rem', 
+                    <h3 style={{
+                      fontSize: '2.5rem',
                       fontWeight: '800',
                       background: card.gradient,
                       WebkitBackgroundClip: 'text',
@@ -500,9 +500,9 @@ const Dashboard = () => {
                     </h3>
                   </div>
 
-                  <div style={{ 
+                  <div style={{
                     marginTop: '1rem',
-                    display: 'flex', 
+                    display: 'flex',
                     alignItems: 'center',
                     gap: '0.375rem',
                     color: 'var(--text-secondary)',
@@ -520,9 +520,9 @@ const Dashboard = () => {
 
       {/* Advanced Features */}
       <div style={{ marginBottom: '2rem' }}>
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
           gap: '0.75rem',
           marginBottom: '1rem',
         }}>
@@ -538,7 +538,7 @@ const Dashboard = () => {
           {features.map((feature, index) => {
             const Icon = feature.icon
             return (
-              <Link 
+              <Link
                 key={feature.title}
                 to={feature.path}
                 style={{
@@ -574,9 +574,9 @@ const Dashboard = () => {
                 }} />
 
                 <div style={{ position: 'relative', zIndex: 1 }}>
-                  <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
                     justifyContent: 'space-between',
                     marginBottom: '1rem',
                   }}>
@@ -607,15 +607,15 @@ const Dashboard = () => {
                     </span>
                   </div>
 
-                  <h3 style={{ 
-                    fontSize: '1.375rem', 
+                  <h3 style={{
+                    fontSize: '1.375rem',
                     fontWeight: '700',
                     color: 'white',
                     marginBottom: '0.5rem',
                   }}>
                     {feature.title}
                   </h3>
-                  <p style={{ 
+                  <p style={{
                     color: 'rgba(255,255,255,0.8)',
                     fontSize: '0.9rem',
                     lineHeight: '1.5',
@@ -651,9 +651,9 @@ const Dashboard = () => {
         animationDelay: '1.1s',
         opacity: 0,
       }}>
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
           gap: '0.75rem',
           marginBottom: '1.25rem',
         }}>
@@ -672,7 +672,7 @@ const Dashboard = () => {
             { label: 'API Services', status: 'Running', color: '#00ff88' },
             { label: 'ML Models', status: 'Loaded', color: '#00d4ff' },
           ].map((item, index) => (
-            <div 
+            <div
               key={item.label}
               style={{
                 display: 'flex',
@@ -683,16 +683,16 @@ const Dashboard = () => {
                 borderRadius: '12px',
               }}
             >
-              <span style={{ 
-                fontSize: '0.9rem', 
-                color: 'var(--text-secondary)' 
+              <span style={{
+                fontSize: '0.9rem',
+                color: 'var(--text-secondary)'
               }}>
                 {item.label}
               </span>
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '0.5rem' 
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
               }}>
                 <div style={{
                   width: '8px',
@@ -701,10 +701,10 @@ const Dashboard = () => {
                   background: item.color,
                   boxShadow: `0 0 10px ${item.color}`,
                 }} />
-                <span style={{ 
-                  fontSize: '0.8rem', 
+                <span style={{
+                  fontSize: '0.8rem',
                   fontWeight: '600',
-                  color: item.color 
+                  color: item.color
                 }}>
                   {item.status}
                 </span>

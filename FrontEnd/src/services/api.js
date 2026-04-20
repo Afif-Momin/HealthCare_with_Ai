@@ -10,22 +10,20 @@ const api = axios.create({
   },
 })
 
-// Request interceptor
+// Request interceptor — anti-cache + auth token
 api.interceptors.request.use(
   (config) => {
     console.log(`[API] ${config.method?.toUpperCase()} ${config.url}`)
 
-    // Add anti-caching headers to all requests
     config.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     config.headers['Pragma'] = 'no-cache'
     config.headers['Expires'] = '0'
 
-    // Add timestamp to GET requests to prevent browser caching
     if (config.method === 'get') {
       config.params = { ...config.params, _t: Date.now() }
     }
 
-    // Attach auth token if available
+    // Attach auth token from localStorage
     try {
       const stored = localStorage.getItem('innovaition_user')
       if (stored) {
@@ -38,30 +36,21 @@ api.interceptors.request.use(
 
     return config
   },
-  (error) => {
-    return Promise.reject(error)
-  }
+  (error) => Promise.reject(error)
 )
 
-// Response interceptor for error handling
+// Response interceptor
 api.interceptors.response.use(
-  (response) => {
-    return response
-  },
+  (response) => response,
   (error) => {
     if (error.response) {
-      // Server responded with error status
       const { status, data } = error.response
-
       if (status === 404) {
         console.error('Resource not found:', data?.message || 'Not found')
       } else if (status === 400) {
-        // Validation errors
         if (data?.errors) {
-          const errorMessages = Object.entries(data.errors)
-            .map(([field, message]) => `${field}: ${message}`)
-            .join('\n')
-          console.error('Validation errors:', errorMessages)
+          const msgs = Object.entries(data.errors).map(([f, m]) => `${f}: ${m}`).join('\n')
+          console.error('Validation errors:', msgs)
         } else {
           console.error('Bad request:', data?.message || 'Invalid request')
         }
@@ -69,17 +58,25 @@ api.interceptors.response.use(
         console.error('Server error:', data?.message || 'Internal server error')
       }
     } else if (error.request) {
-      // Request made but no response received
       console.error('Network error: No response from server. Make sure the backend is running on port 8080.')
     } else {
-      // Something else happened
       console.error('Error:', error.message)
     }
     return Promise.reject(error)
   }
 )
 
-// Patients API
+// ── Auth API ─────────────────────────────────────────────────────────────────
+export const authAPI = {
+  register: (data) => api.post('/auth/register', data),
+  login: (data) => api.post('/auth/login', data),
+  verifyOtp: (data) => api.post('/auth/verify-otp', data),
+  resendOtp: (email) => api.post('/auth/resend-otp', { email }),
+  getProfile: (email) => api.get(`/auth/profile/${encodeURIComponent(email)}`),
+  updateProfile: (email, data) => api.put(`/auth/profile/${encodeURIComponent(email)}`, data),
+}
+
+// ── Patients API ─────────────────────────────────────────────────────────────
 export const patientsAPI = {
   getAll: (search) => {
     const params = search ? { search } : {}
@@ -91,7 +88,7 @@ export const patientsAPI = {
   delete: (id) => api.delete(`/patients/${id}`),
 }
 
-// Medical Records API
+// ── Medical Records API ───────────────────────────────────────────────────────
 export const medicalRecordsAPI = {
   getAll: (patientId, recordType) => {
     const params = {}
@@ -105,7 +102,7 @@ export const medicalRecordsAPI = {
   delete: (id) => api.delete(`/medical-records/${id}`),
 }
 
-// Appointments API
+// ── Appointments API ──────────────────────────────────────────────────────────
 export const appointmentsAPI = {
   getAll: (patientId, status) => {
     const params = {}
@@ -119,7 +116,7 @@ export const appointmentsAPI = {
   delete: (id) => api.delete(`/appointments/${id}`),
 }
 
-// Prescriptions API
+// ── Prescriptions API ─────────────────────────────────────────────────────────
 export const prescriptionsAPI = {
   getAll: (patientId, activeOnly) => {
     const params = {}
@@ -135,7 +132,7 @@ export const prescriptionsAPI = {
   delete: (id) => api.delete(`/prescriptions/${id}`),
 }
 
-// AI Analysis API
+// ── AI Analysis API ───────────────────────────────────────────────────────────
 export const aiAnalysisAPI = {
   getAll: (patientId, analysisType) => {
     const params = {}
@@ -149,22 +146,12 @@ export const aiAnalysisAPI = {
   delete: (id) => api.delete(`/ai-analysis/${id}`),
 }
 
-// Health Check API
+// ── Health Check API ──────────────────────────────────────────────────────────
 export const healthAPI = {
   check: () => api.get('/health'),
 }
 
-// Auth API
-export const authAPI = {
-  register: (data) => api.post('/auth/register', data),
-  login: (data) => api.post('/auth/login', data),
-  verifyOtp: (data) => api.post('/auth/verify-otp', data),
-  resendOtp: (email) => api.post('/auth/resend-otp', { email }),
-  getProfile: (email) => api.get(`/auth/profile/${encodeURIComponent(email)}`),
-  updateProfile: (email, data) => api.put(`/auth/profile/${encodeURIComponent(email)}`, data),
-}
-
-// Early Warning API
+// ── Early Warning API ─────────────────────────────────────────────────────────
 export const earlyWarningAPI = {
   detect: (region, timePeriod) => {
     const params = {}
@@ -174,38 +161,34 @@ export const earlyWarningAPI = {
   },
 }
 
-// Digital Twin API
+// ── Digital Twin API ──────────────────────────────────────────────────────────
 export const digitalTwinAPI = {
   getByPatient: (patientId) => api.get(`/digital-twin/patient/${patientId}`),
 }
 
-// Health Story API
+// ── Health Story API ──────────────────────────────────────────────────────────
 export const healthStoryAPI = {
   getByPatient: (patientId) => api.get(`/health-story/patient/${patientId}`),
   askQuestion: (patientId, question) => api.post(`/health-story/patient/${patientId}/ask`, { question }),
 }
 
-// What-If Simulator API
+// ── What-If Simulator API ─────────────────────────────────────────────────────
 export const whatIfAPI = {
   simulate: (patientId, scenarioType, parameters) =>
     api.post(`/what-if/patient/${patientId}/simulate?scenarioType=${scenarioType}`, parameters),
 }
 
-// Population Intelligence API
+// ── Population Intelligence API ───────────────────────────────────────────────
 export const populationIntelligenceAPI = {
   analyzeAll: () => api.get('/population-intelligence/analyze-all'),
 }
 
-// Hospital Connector API
+// ── Hospital Connector API ────────────────────────────────────────────────────
 export const hospitalConnectorAPI = {
   findNearest: (patientId, analysisType, latitude, longitude) => {
     const params = { analysisType }
-    if (latitude !== null && latitude !== undefined) {
-      params.latitude = latitude
-    }
-    if (longitude !== null && longitude !== undefined) {
-      params.longitude = longitude
-    }
+    if (latitude != null) params.latitude = latitude
+    if (longitude != null) params.longitude = longitude
     return api.get(`/hospitals/nearest/${patientId}`, { params })
   },
   sendProfile: (patientId, hospitalEmail, isEmergency) =>
@@ -214,7 +197,7 @@ export const hospitalConnectorAPI = {
     }),
 }
 
-// Predictive Timeline API
+// ── Predictive Timeline API ───────────────────────────────────────────────────
 export const predictiveTimelineAPI = {
   generate: (patientId, healthInputs) =>
     api.post(`/predictive-timeline/patient/${patientId}`, healthInputs),
@@ -226,79 +209,47 @@ export const predictiveTimelineAPI = {
     api.get('/predictive-timeline/interventions'),
 }
 
-// SOS Emergency API - Silent Guardian Fall Detection
+// ── SOS Emergency API ─────────────────────────────────────────────────────────
 export const sosAPI = {
   triggerEmergency: (sosRequest) => api.post('/sos', sosRequest),
 }
 
-// Advanced AI Detection API (FastAPI Server)
+// ── Advanced AI Detection API (FastAPI) ───────────────────────────────────────
 const AI_API_BASE_URL = import.meta.env.VITE_AI_API_BASE_URL || 'http://localhost:8000'
 
 const aiApi = axios.create({
   baseURL: AI_API_BASE_URL,
-  headers: {
-    'Content-Type': 'multipart/form-data',
-  },
+  headers: { 'Content-Type': 'multipart/form-data' },
 })
 
-// Request interceptor for AI API
 aiApi.interceptors.request.use(
   (config) => {
-    // Add anti-caching headers to all requests
     config.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     config.headers['Pragma'] = 'no-cache'
     config.headers['Expires'] = '0'
-
-    // Add timestamp to GET requests to prevent browser caching
     if (config.method === 'get') {
       config.params = { ...config.params, _t: Date.now() }
     }
-
-    // For POST requests with FormData, append a timestamp field to force backend to see it as new data
-    // This ensures that re-uploading the same file triggers a fresh analysis
     if (config.method === 'post' && config.data instanceof FormData) {
       config.data.append('_t', Date.now().toString())
     }
-
     return config
   },
-  (error) => {
-    return Promise.reject(error)
-  }
+  (error) => Promise.reject(error)
 )
 
-// Advanced Detection API (FastAPI Server for AI Models)
 export const advancedDetectionAPI = {
-  // Health check for AI server
   health: () => aiApi.get('/health'),
-
-  // Retinal Disease Detection
   retinalDisease: (formData) => aiApi.post('/api/v1/retinal-disease/predict', formData),
-
-  // Skin Cancer Classification
   skinCancer: (formData) => aiApi.post('/api/v1/skin-cancer/predict', formData),
-
-  // Skin Lesions Detection
   skinLesions: (formData) => aiApi.post('/api/v1/skin-lesions/predict', formData),
-
-  // Parkinson Speech Detection
   parkinson: (formData) => aiApi.post('/api/v1/parkinson/predict', formData),
-
-  // GastroAI - Gastrointestinal Disease Detection
   gastro: (formData) => aiApi.post('/api/v1/gastro/predict', formData),
-
-  // LungAI - Lung Cancer Detection
   lungCancer: (formData) => aiApi.post('/api/v1/lung-cancer/predict', formData),
-
-  // Thyroid Disease Detection (JSON body, not FormData)
   thyroid: (patientData) => axios.post(`${AI_API_BASE_URL}/api/v1/thyroid/predict`, patientData, {
     headers: { 'Content-Type': 'application/json' }
   }),
-
-  // RETFound - Retinal Foundation Model
   retfound: (formData) => aiApi.post('/api/v1/retfound/predict', formData),
-
-  // Batch prediction for retinal diseases
   retinalDiseaseBatch: (formData) => aiApi.post('/api/v1/batch/retinal-disease', formData),
 }
 
