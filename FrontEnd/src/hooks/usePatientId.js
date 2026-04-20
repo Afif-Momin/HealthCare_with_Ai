@@ -3,49 +3,67 @@ import { useAuth } from '../context/AuthContext'
 import { authAPI } from '../services/api'
 
 /**
- * For PATIENT role: resolves the Patient table ID from the patients table
- * using the logged-in user's email. Returns null for other roles.
+ * Resolves the data-scope for the currently logged-in user.
+ *
+ * Non-patient roles (ADMIN, DOCTOR, NURSE):
+ *   - filterPatientId = null  → load ALL records
+ *   - ready = true immediately
+ *
+ * PATIENT role:
+ *   - ready = false while looking up their Patient row ID
+ *   - once resolved, filterPatientId = <Patient.id> (loads only their records)
+ *   - if no Patient row is linked, filterPatientId = -1 (loads nothing, safe)
  *
  * Usage:
- *   const { patientId, loading } = usePatientId()
- *   // patientId = number when found, null if no linked Patient row
+ *   const { filterPatientId, ready, isPatient, canCreate } = usePatientScope()
  */
 export function usePatientId() {
   const { user } = useAuth()
-  const [patientId, setPatientId] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const isPatient = user?.role === 'PATIENT'
+
+  // For non-patients: immediately ready, no filter
+  const [filterPatientId, setFilterPatientId] = useState(isPatient ? undefined : null)
+  const [ready, setReady] = useState(!isPatient)
 
   useEffect(() => {
-    if (user?.role !== 'PATIENT') {
-      setPatientId(null)
-      setLoading(false)
+    if (!isPatient) {
+      // Admin / Doctor / Nurse — load everything
+      setFilterPatientId(null)
+      setReady(true)
       return
     }
 
-    // Try cache first
-    const cached = sessionStorage.getItem(`pid_${user.email}`)
+    // Patient — resolve their Patient table ID
+    setReady(false)
+
+    const cacheKey = `pid_${user.email}`
+    const cached = sessionStorage.getItem(cacheKey)
     if (cached) {
-      setPatientId(Number(cached))
-      setLoading(false)
+      setFilterPatientId(Number(cached))
+      setReady(true)
       return
     }
 
     authAPI.getPatientId(user.email)
       .then(res => {
-        const pid = res.data.patientId
+        const pid = res.data?.patientId
         if (pid) {
-          sessionStorage.setItem(`pid_${user.email}`, String(pid))
-          setPatientId(Number(pid))
+          sessionStorage.setItem(cacheKey, String(pid))
+          setFilterPatientId(Number(pid))
         } else {
-          setPatientId(null)
+          // No linked Patient row — use -1 so the query returns nothing
+          setFilterPatientId(-1)
         }
       })
-      .catch(() => setPatientId(null))
-      .finally(() => setLoading(false))
-  }, [user])
+      .catch(() => setFilterPatientId(-1))
+      .finally(() => setReady(true))
+  }, [user?.email, isPatient])
 
-  const isPatient = user?.role === 'PATIENT'
-  const canModify = !isPatient // patients are read-only
+  // Role-specific write permissions
+  const role = user?.role
+  const canCreate = role === 'ADMIN' || role === 'DOCTOR'
+  const canManageAppointments = role === 'ADMIN' || role === 'DOCTOR' || role === 'NURSE'
+  const canModify = !isPatient // generic: non-patients can see write buttons
 
-  return { patientId, loading, isPatient, canModify }
+  return { filterPatientId, ready, isPatient, canModify, canCreate, canManageAppointments }
 }
