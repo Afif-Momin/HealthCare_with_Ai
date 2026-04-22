@@ -73,7 +73,7 @@ services:
   - name: healthcare-frontend
     type: web
     runtime: static
-    buildCommand: cd FrontEnd && npm ci && npm run build
+    buildCommand: cd FrontEnd && npm install --legacy-peer-deps && npm run build
     staticPublishPath: ./FrontEnd/dist
     plan: free
     routes:

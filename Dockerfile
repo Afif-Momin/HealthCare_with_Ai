@@ -15,8 +15,8 @@
 # ----------- Build Frontend -----------
 FROM node:20-alpine AS frontend-build
 WORKDIR /frontend
-COPY FrontEnd/package.json FrontEnd/package-lock.json ./
-RUN npm ci --prefer-offline
+COPY FrontEnd/package.json ./
+RUN npm install --legacy-peer-deps
 COPY FrontEnd/ ./
 RUN npm run build
 
