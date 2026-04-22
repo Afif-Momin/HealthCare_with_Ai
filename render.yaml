@@ -1,0 +1,94 @@
+# render.yaml — Render Infrastructure as Code
+# =============================================
+# This file defines all 4 services for the HealthCare_with_Ai platform.
+# Commit this file to your repo root; Render will auto-detect it.
+#
+# Deploy steps:
+#   1. Push this file to GitHub
+#   2. In Render dashboard → "New" → "Blueprint" → connect your repo
+#   3. Render will create all 4 services automatically
+#
+# Free Tier RAM budget per service (512 MB limit):
+#   healthcare-backend  : ~300 MB  ✅
+#   healthcare-ai       : ~420 MB  ✅
+#   healthcare-lungai   : ~360 MB  ✅
+#   healthcare-frontend : 0 MB (Static Site, CDN) ✅
+
+services:
+  # ──────────────────────────────────────────
+  # 1. Spring Boot Backend
+  # ──────────────────────────────────────────
+  - name: healthcare-backend
+    type: web
+    runtime: docker
+    dockerfilePath: ./BackEnd/Dockerfile
+    dockerContext: ./BackEnd
+    plan: free
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: JAVA_OPTS
+        value: "-Xmx256m -Xms64m -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -XX:+UseStringDeduplication -Djava.security.egd=file:/dev/./urandom"
+      # Add your secrets here or use Render Environment Groups
+      # - key: SPRING_DATASOURCE_URL
+      #   sync: false  # prompts for value in dashboard
+
+  # ──────────────────────────────────────────
+  # 2. FastAPI Medical AI Server
+  # ──────────────────────────────────────────
+  - name: healthcare-ai
+    type: web
+    runtime: docker
+    dockerfilePath: ./AI/fastapi_server/Dockerfile
+    dockerContext: ./AI/fastapi_server
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: PYTHONDONTWRITEBYTECODE
+        value: "1"
+
+  # ──────────────────────────────────────────
+  # 3. LungAI Gradio Interface
+  # ──────────────────────────────────────────
+  - name: healthcare-lungai
+    type: web
+    runtime: docker
+    dockerfilePath: ./AI/LungAI/Dockerfile
+    dockerContext: ./AI/LungAI
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: GRADIO_SERVER_NAME
+        value: "0.0.0.0"
+      - key: GRADIO_ANALYTICS_ENABLED
+        value: "False"
+      - key: PYTHONUNBUFFERED
+        value: "1"
+
+  # ──────────────────────────────────────────
+  # 4. React Frontend (Static Site)
+  #    FREE tier, CDN-served, never spins down
+  # ──────────────────────────────────────────
+  - name: healthcare-frontend
+    type: web
+    runtime: static
+    buildCommand: cd FrontEnd && npm ci && npm run build
+    staticPublishPath: ./FrontEnd/dist
+    plan: free
+    routes:
+      # All routes fall back to index.html for React Router (SPA)
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      # Security headers
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable

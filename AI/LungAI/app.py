@@ -3,6 +3,7 @@ from PIL import Image
 from torchvision import transforms
 from architecture import ResNetLungCancer
 import gradio as gr
+import os
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -40,4 +41,11 @@ iface = gr.Interface(
     ]
 )
 
-iface.launch(share=True)
+# Render requires binding to 0.0.0.0; share=True creates a Gradio tunnel
+# that conflicts with Render's reverse proxy — always False in production.
+port = int(os.environ.get("PORT", 7860))
+iface.launch(
+    server_name="0.0.0.0",
+    server_port=port,
+    share=False
+)
