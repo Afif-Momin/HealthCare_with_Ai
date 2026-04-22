@@ -13,7 +13,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/ai-analysis")
-@CrossOrigin(origins = "*")
 public class AIAnalysisController {
 
     @Autowired

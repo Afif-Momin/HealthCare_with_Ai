@@ -24,7 +24,7 @@ services:
     dockerfilePath: ./BackEnd/Dockerfile
     dockerContext: ./BackEnd
     plan: free
-    healthCheckPath: /actuator/health
+    healthCheckPath: /api/health
     envVars:
       - key: JAVA_OPTS
         value: "-Xmx256m -Xms64m -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -XX:+UseStringDeduplication -Djava.security.egd=file:/dev/./urandom"

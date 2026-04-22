@@ -10,7 +10,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/population-intelligence")
-@CrossOrigin(origins = "*")
 public class PopulationIntelligenceController {
 
     @Autowired

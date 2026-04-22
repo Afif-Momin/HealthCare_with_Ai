@@ -9,7 +9,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/digital-twin")
-@CrossOrigin(origins = "*")
 public class DigitalTwinController {
 
     @Autowired

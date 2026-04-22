@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/api/sos")
-@CrossOrigin(origins = "*")
 public class SOSController {
 
     private static final Logger logger = LoggerFactory.getLogger(SOSController.class);

@@ -9,7 +9,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/what-if")
-@CrossOrigin(origins = "*")
 public class WhatIfSimulatorController {
 
     @Autowired

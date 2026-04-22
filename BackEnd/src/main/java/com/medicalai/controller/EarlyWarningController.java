@@ -9,7 +9,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/early-warning")
-@CrossOrigin(origins = "*")
 public class EarlyWarningController {
 
     @Autowired

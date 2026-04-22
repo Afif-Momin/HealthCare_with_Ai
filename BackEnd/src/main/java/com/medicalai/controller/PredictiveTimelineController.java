@@ -10,7 +10,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/predictive-timeline")
-@CrossOrigin(origins = "*")
 public class PredictiveTimelineController {
 
     @Autowired
