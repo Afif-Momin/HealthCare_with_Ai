@@ -1,24 +1,9 @@
 package com.medicalai.config;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
-
-@Configuration
-public class CorsConfig {
-
-    @Bean
-    public CorsFilter corsFilter() {
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(false);
-        config.addAllowedOriginPattern("*");
-        config.addAllowedHeader("*");
-        config.addAllowedMethod("*");
-        source.registerCorsConfiguration("/**", config);
-        return new CorsFilter(source);
-    }
-}
+// CORS is configured centrally in SecurityConfig.java via corsConfigurationSource().
+// This file is intentionally left as a placeholder to avoid duplicate CORS beans,
+// which caused preflight (OPTIONS) requests to fail with 404 in production.
+//
+// DO NOT add a CorsFilter or WebMvcConfigurer bean here —
+// it conflicts with Spring Security's CORS handling.
 
