@@ -64,6 +64,8 @@ build/
 .env
 .env.*
 !.env.example
+!.env.production
+!FrontEnd/.env.production
 application-secret.properties
 
 # ── Logs ─────────────────────────────────────────────────────

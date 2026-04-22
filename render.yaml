@@ -76,6 +76,15 @@ services:
     buildCommand: cd FrontEnd && npm install --legacy-peer-deps && npm run build
     staticPublishPath: ./FrontEnd/dist
     plan: free
+    envVars:
+      # ── CRITICAL: Vite bakes these into the JS bundle at BUILD TIME ──
+      # These must match your actual Render service URLs.
+      # Update VITE_API_BASE_URL to your Spring Boot service URL (healthcare-backend)
+      # Update VITE_AI_API_BASE_URL to your FastAPI service URL (healthcare-ai)
+      - key: VITE_API_BASE_URL
+        value: https://healthcare-backend.onrender.com/api
+      - key: VITE_AI_API_BASE_URL
+        value: https://healthcare-ai.onrender.com
     routes:
       # All routes fall back to index.html for React Router (SPA)
       - type: rewrite
