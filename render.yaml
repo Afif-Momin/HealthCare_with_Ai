@@ -1,28 +1,27 @@
 # render.yaml — Render Infrastructure as Code
 # =============================================
-# This file defines all 4 services for the HealthCare_with_Ai platform.
-# Commit this file to your repo root; Render will auto-detect it.
+# This file defines all 3 services for the HealthCare_with_Ai platform.
+# The frontend is now served by the Spring Boot backend (single service).
 #
 # Deploy steps:
 #   1. Push this file to GitHub
 #   2. In Render dashboard → "New" → "Blueprint" → connect your repo
-#   3. Render will create all 4 services automatically
+#   3. Render will create all 3 services automatically
 #
 # Free Tier RAM budget per service (512 MB limit):
-#   healthcare-backend  : ~300 MB  ✅
+#   healthcare-with-ai  : ~350 MB (Backend + Frontend) ✅
 #   healthcare-ai       : ~420 MB  ✅
 #   healthcare-lungai   : ~360 MB  ✅
-#   healthcare-frontend : 0 MB (Static Site, CDN) ✅
 
 services:
   # ──────────────────────────────────────────
-  # 1. Spring Boot Backend
+  # 1. Spring Boot Backend + React Frontend (Integrated)
   # ──────────────────────────────────────────
-  - name: healthcare-backend
+  - name: healthcare-with-ai
     type: web
     runtime: docker
-    dockerfilePath: ./BackEnd/Dockerfile
-    dockerContext: ./BackEnd
+    dockerfilePath: ./Dockerfile.integrated
+    dockerContext: .
     plan: free
     healthCheckPath: /api/health
     envVars:
@@ -60,6 +59,11 @@ services:
         sync: false  # Mark as secret
       - key: ADMIN_PASSWORD
         sync: false  # Mark as secret
+      # Frontend API URLs (for build time)
+      - key: VITE_API_BASE_URL
+        value: "/api"
+      - key: VITE_AI_API_BASE_URL
+        value: "https://healthcare-ai.onrender.com"
 
   # ──────────────────────────────────────────
   # 2. FastAPI Medical AI Server
@@ -94,39 +98,3 @@ services:
         value: "False"
       - key: PYTHONUNBUFFERED
         value: "1"
-
-  # ──────────────────────────────────────────
-  # 4. React Frontend (Static Site)
-  #    FREE tier, CDN-served, never spins down
-  # ──────────────────────────────────────────
-  - name: healthcare-frontend
-    type: web
-    runtime: static
-    buildCommand: cd FrontEnd && npm install --legacy-peer-deps && npm run build
-    staticPublishPath: ./FrontEnd/dist
-    plan: free
-    envVars:
-      # ── CRITICAL: Vite bakes these into the JS bundle at BUILD TIME ──
-      # These must match your actual Render service URLs.
-      # Update VITE_API_BASE_URL to your Spring Boot service URL (healthcare-backend)
-      # Update VITE_AI_API_BASE_URL to your FastAPI service URL (healthcare-ai)
-      - key: VITE_API_BASE_URL
-        value: https://healthcare-backend.onrender.com/api
-      - key: VITE_AI_API_BASE_URL
-        value: https://healthcare-ai.onrender.com
-    routes:
-      # All routes fall back to index.html for React Router (SPA)
-      - type: rewrite
-        source: /*
-        destination: /index.html
-    headers:
-      # Security headers
-      - path: /*
-        name: X-Frame-Options
-        value: DENY
-      - path: /*
-        name: X-Content-Type-Options
-        value: nosniff
-      - path: /assets/*
-        name: Cache-Control
-        value: public, max-age=31536000, immutable

@@ -26,6 +26,9 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Allow CORS preflight requests without authentication
                 .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+                // Allow static resources (React frontend)
+                .requestMatchers("/", "/index.html", "/assets/**", "/favicon.ico", "/vite.svg").permitAll()
+                // Allow all other requests (API endpoints)
                 .anyRequest().permitAll()
             );
         return http.build();
