@@ -26,11 +26,40 @@ services:
     plan: free
     healthCheckPath: /api/health
     envVars:
+      - key: PORT
+        value: "8080"
       - key: JAVA_OPTS
         value: "-Xmx256m -Xms64m -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -XX:+UseStringDeduplication -Djava.security.egd=file:/dev/./urandom"
-      # Add your secrets here or use Render Environment Groups
-      # - key: SPRING_DATASOURCE_URL
-      #   sync: false  # prompts for value in dashboard
+      # Database Configuration
+      - key: DATABASE_URL
+        value: "jdbc:postgresql://ep-wandering-wildflower-a1exphgy-pooler.ap-southeast-1.aws.neon.tech:5432/neondb?sslmode=require"
+      - key: DATABASE_USERNAME
+        value: "neondb_owner"
+      - key: DATABASE_PASSWORD
+        sync: false  # Mark as secret - you'll set this in Render dashboard
+      # Gemini API Configuration
+      - key: GEMINI_API_KEY
+        sync: false  # Mark as secret
+      - key: GEMINI_API_URL
+        value: "https://generativelanguage.googleapis.com/v1"
+      - key: GEMINI_API_MODEL
+        value: "gemini-2.5-flash-lite"
+      # Email Configuration
+      - key: MAIL_HOST
+        value: "smtp.gmail.com"
+      - key: MAIL_PORT
+        value: "465"
+      - key: MAIL_USERNAME
+        sync: false  # Mark as secret
+      - key: MAIL_PASSWORD
+        sync: false  # Mark as secret
+      - key: RESEND_API_KEY
+        sync: false  # Mark as secret
+      # Admin Credentials
+      - key: ADMIN_EMAIL
+        sync: false  # Mark as secret
+      - key: ADMIN_PASSWORD
+        sync: false  # Mark as secret
 
   # ──────────────────────────────────────────
   # 2. FastAPI Medical AI Server
