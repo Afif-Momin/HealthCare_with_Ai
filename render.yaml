@@ -63,7 +63,7 @@ services:
       - key: VITE_API_BASE_URL
         value: "/api"
       - key: VITE_AI_API_BASE_URL
-        value: "https://healthcare-ai.onrender.com"
+        value: "https://healthcare-ai.onrender.com"  # Update after AI service is deployed
 
   # ──────────────────────────────────────────
   # 2. FastAPI Medical AI Server

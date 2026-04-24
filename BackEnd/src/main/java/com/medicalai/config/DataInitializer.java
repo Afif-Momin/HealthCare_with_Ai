@@ -8,7 +8,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
+// No LocalDate import needed - dateOfBirth is String
 
 /**
  * Database Initializer
@@ -80,7 +80,7 @@ public class DataInitializer implements CommandLineRunner {
             patient.setPassword(passwordEncoder.encode("patient123"));
             patient.setRole(User.Role.PATIENT);
             patient.setPhone("+1-555-0103");
-            patient.setDateOfBirth(LocalDate.of(1985, 5, 15));
+            patient.setDateOfBirth("1985-05-15"); // String format: YYYY-MM-DD
             patient.setBloodGroup("O+");
             patient.setAddress("123 Main St, New York, NY 10001");
             patient.setGender("Male");
