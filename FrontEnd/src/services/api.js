@@ -1,7 +1,45 @@
 import axios from 'axios'
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'
+// ── Dynamic base URL resolution ──────────────────────────────────────────────
+// Order of precedence:
+//   1. Explicit Vite env var (build-time).
+//   2. Browser host detection (runtime) — uses whatever host loaded the page,
+//      so the same build works on localhost, EC2 IP, or a domain.
+//   3. SSR / non-browser fallback to localhost.
+function resolveApiBaseUrl() {
+  const envUrl = import.meta.env.VITE_API_BASE_URL
+  if (envUrl && envUrl.trim() !== '') return envUrl
+
+  if (typeof window !== 'undefined' && window.location) {
+    const { protocol, hostname, port } = window.location
+    // Vite dev server → backend is on :8080 of the same host.
+    if (port === '3000' || port === '5173') {
+      return `${protocol}//${hostname}:8080/api`
+    }
+    // Integrated deployment (backend serves frontend) or reverse proxy → relative.
+    if (port === '8080' || port === '' || port === '80' || port === '443') {
+      return '/api'
+    }
+    // Standalone frontend on another port → assume backend on :8080 of same host.
+    return `${protocol}//${hostname}:8080/api`
+  }
+
+  return 'http://localhost:8080/api'
+}
+
+function resolveAiApiBaseUrl() {
+  const envUrl = import.meta.env.VITE_AI_API_BASE_URL
+  if (envUrl && envUrl.trim() !== '') return envUrl
+
+  if (typeof window !== 'undefined' && window.location) {
+    const { protocol, hostname } = window.location
+    return `${protocol}//${hostname}:8000`
+  }
+
+  return 'http://localhost:8000'
+}
+
+const API_BASE_URL = resolveApiBaseUrl()
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -217,7 +255,7 @@ export const sosAPI = {
 }
 
 // ── Advanced AI Detection API (FastAPI) ───────────────────────────────────────
-const AI_API_BASE_URL = import.meta.env.VITE_AI_API_BASE_URL || 'http://localhost:8000'
+const AI_API_BASE_URL = resolveAiApiBaseUrl()
 
 const aiApi = axios.create({
   baseURL: AI_API_BASE_URL,
