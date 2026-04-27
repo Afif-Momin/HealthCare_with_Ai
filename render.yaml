@@ -1,17 +1,16 @@
 # render.yaml — Render Infrastructure as Code
 # =============================================
-# This file defines all 3 services for the HealthCare_with_Ai platform.
-# The frontend is now served by the Spring Boot backend (single service).
+# This file defines the services for the HealthCare_with_Ai platform.
+# The frontend is served by the Spring Boot backend (single service).
 #
 # Deploy steps:
 #   1. Push this file to GitHub
 #   2. In Render dashboard → "New" → "Blueprint" → connect your repo
-#   3. Render will create all 3 services automatically
+#   3. Render will create all services automatically
 #
 # Free Tier RAM budget per service (512 MB limit):
 #   healthcare-with-ai  : ~350 MB (Backend + Frontend) ✅
 #   healthcare-ai       : ~420 MB  ✅
-#   healthcare-lungai   : ~360 MB  ✅
 
 services:
   # ──────────────────────────────────────────
@@ -59,11 +58,12 @@ services:
         sync: false  # Mark as secret
       - key: ADMIN_PASSWORD
         sync: false  # Mark as secret
-      # Frontend API URLs (for build time)
-      - key: VITE_API_BASE_URL
-        value: "/api"
-      - key: VITE_AI_API_BASE_URL
-        value: "https://healthcare-ai.onrender.com"  # Update after AI service is deployed
+      # Frontend API URLs (build-time pins). Leave unset to enable runtime
+      # host detection (see FrontEnd/src/services/api.js).
+      # - key: VITE_API_BASE_URL
+      #   value: "/api"
+      # - key: VITE_AI_API_BASE_URL
+      #   value: "https://healthcare-ai.onrender.com"
 
   # ──────────────────────────────────────────
   # 2. FastAPI Medical AI Server
@@ -81,20 +81,3 @@ services:
       - key: PYTHONDONTWRITEBYTECODE
         value: "1"
 
-  # ──────────────────────────────────────────
-  # 3. LungAI Gradio Interface
-  # ──────────────────────────────────────────
-  - name: healthcare-lungai
-    type: web
-    runtime: docker
-    dockerfilePath: ./AI/LungAI/Dockerfile
-    dockerContext: ./AI/LungAI
-    plan: free
-    healthCheckPath: /
-    envVars:
-      - key: GRADIO_SERVER_NAME
-        value: "0.0.0.0"
-      - key: GRADIO_ANALYTICS_ENABLED
-        value: "False"
-      - key: PYTHONUNBUFFERED
-        value: "1"

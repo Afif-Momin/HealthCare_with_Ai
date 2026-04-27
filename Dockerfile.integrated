@@ -21,9 +21,10 @@ RUN npm install --legacy-peer-deps
 # Copy frontend source
 COPY FrontEnd/ ./
 
-# Build frontend (Vite will use VITE_* env vars if available)
-ARG VITE_API_BASE_URL=/api
-ARG VITE_AI_API_BASE_URL=https://healthcare-ai.onrender.com
+# Build frontend (Vite picks up VITE_* env vars when set; otherwise the
+# bundle uses runtime host detection — see FrontEnd/src/services/api.js).
+ARG VITE_API_BASE_URL
+ARG VITE_AI_API_BASE_URL
 ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
 ENV VITE_AI_API_BASE_URL=${VITE_AI_API_BASE_URL}
 

@@ -1,9 +1,0 @@
-# LungAI (Gradio) — Optimised for Render Free Tier (512 MB)
-# CPU-only torch installed via --extra-index-url in Dockerfile
-torch==2.1.0
-torchvision==0.16.0
-numpy
-Pillow
-scikit-learn
-onnxruntime
-gradio>=4.0.0

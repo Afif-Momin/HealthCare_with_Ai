@@ -282,14 +282,9 @@ export const advancedDetectionAPI = {
   health: () => aiApi.get('/health'),
   retinalDisease: (formData) => aiApi.post('/api/v1/retinal-disease/predict', formData),
   skinCancer: (formData) => aiApi.post('/api/v1/skin-cancer/predict', formData),
-  skinLesions: (formData) => aiApi.post('/api/v1/skin-lesions/predict', formData),
-  parkinson: (formData) => aiApi.post('/api/v1/parkinson/predict', formData),
-  gastro: (formData) => aiApi.post('/api/v1/gastro/predict', formData),
-  lungCancer: (formData) => aiApi.post('/api/v1/lung-cancer/predict', formData),
   thyroid: (patientData) => axios.post(`${AI_API_BASE_URL}/api/v1/thyroid/predict`, patientData, {
     headers: { 'Content-Type': 'application/json' }
   }),
-  retfound: (formData) => aiApi.post('/api/v1/retfound/predict', formData),
   retinalDiseaseBatch: (formData) => aiApi.post('/api/v1/batch/retinal-disease', formData),
 }
 
