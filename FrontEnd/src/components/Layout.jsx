@@ -151,8 +151,8 @@ const Layout = ({ children }) => {
             </div>
             {!collapsed && (
               <div>
-                <div style={{ fontSize: '1.15rem', fontWeight: '800', background: 'var(--gradient-primary)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-0.02em', lineHeight: 1.1 }}>InnovAItion</div>
-                <div style={{ fontSize: '0.62rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: '500' }}>Healthcare AI</div>
+                <div style={{ fontSize: '1.15rem', fontWeight: '800', background: 'var(--gradient-primary)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-0.02em', lineHeight: 1.1 }}>Healthcare with AI</div>
+                <div style={{ fontSize: '0.62rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: '500' }}>AI-Powered Platform</div>
               </div>
             )}
           </Link>
@@ -276,7 +276,7 @@ const Layout = ({ children }) => {
         {/* Footer */}
         <footer style={{ padding: '1.25rem 1.75rem', borderTop: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
           <p style={{ fontSize: '0.775rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.45rem', margin: 0 }}>
-            <Sparkles size={13} color="var(--accent-primary)" /> Powered by InnovAItion Healthcare AI
+            <Sparkles size={13} color="var(--accent-primary)" /> Powered by Healthcare with AI
           </p>
           <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', margin: 0 }}>© 2026 All rights reserved</p>
         </footer>

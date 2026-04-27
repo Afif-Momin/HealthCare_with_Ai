@@ -67,8 +67,8 @@ export default function Login() {
                 <Sparkles size={24} color="white" />
               </div>
               <div>
-                <div style={{ fontSize: '1.5rem', fontWeight: '800', background: 'var(--gradient-primary)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>InnovAItion</div>
-                <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Healthcare AI</div>
+                <div style={{ fontSize: '1.5rem', fontWeight: '800', background: 'var(--gradient-primary)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Healthcare with AI</div>
+                <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>AI-Powered Platform</div>
               </div>
             </div>
             <h1 style={{ fontSize: '3rem', fontWeight: '800', lineHeight: 1.1, marginBottom: '1.25rem', letterSpacing: '-0.03em' }}>
@@ -101,8 +101,8 @@ export default function Login() {
                 <Sparkles size={22} color="white" />
               </div>
               <div>
-                <div style={{ fontSize: '1.15rem', fontWeight: '800', background: 'var(--gradient-primary)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>InnovAItion</div>
-                <div style={{ fontSize: '0.62rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Healthcare AI</div>
+                <div style={{ fontSize: '1.15rem', fontWeight: '800', background: 'var(--gradient-primary)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Healthcare with AI</div>
+                <div style={{ fontSize: '0.62rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>AI-Powered Platform</div>
               </div>
             </div>
 
@@ -164,10 +164,6 @@ export default function Login() {
               <Link to="/signup" style={{ color: 'var(--accent-primary)', fontWeight: '600' }}>Create account</Link>
             </p>
 
-            <div style={{ background: 'rgba(255,215,0,0.05)', border: '1px solid rgba(255,215,0,0.15)', borderRadius: '10px', padding: '0.75rem 1rem', fontSize: '0.76rem', color: 'var(--text-muted)', textAlign: 'center' }}>
-              <Shield size={12} style={{ verticalAlign: 'middle', marginRight: '5px', color: '#ffd700' }} />
-              Admin: <span style={{ color: '#ffd700' }}>ismailmansury9737@gmail.com</span>
-            </div>
           </div>
         </div>
       </div>

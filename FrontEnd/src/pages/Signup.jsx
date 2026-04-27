@@ -98,7 +98,7 @@ export default function Signup() {
             <div style={{ width: '38px', height: '38px', background: 'var(--gradient-primary)', borderRadius: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 20px rgba(0,212,255,0.3)' }}>
               <Sparkles size={18} color="white" />
             </div>
-            <span style={{ fontSize: '1.25rem', fontWeight: '800', background: 'var(--gradient-primary)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>InnovAItion</span>
+            <span style={{ fontSize: '1.25rem', fontWeight: '800', background: 'var(--gradient-primary)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Healthcare with AI</span>
           </div>
           <h2 style={{ fontSize: '1.5rem', fontWeight: '700', margin: '0 0 0.2rem', letterSpacing: '-0.02em' }}>
             {step === 1 ? 'Create your account' : step === 2 ? 'Personal information' : 'Verify your email'}
