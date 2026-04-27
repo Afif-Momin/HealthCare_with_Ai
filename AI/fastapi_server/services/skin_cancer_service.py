@@ -4,13 +4,15 @@ Skin Cancer Classification Service
 Uses EfficientNet model trained on skin cancer images for classification.
 Based on the ISIC 2020 dataset with 9 cancer types.
 """
+from __future__ import annotations  # defer evaluation of type hints
 
 import os
 import numpy as np
 from PIL import Image
 from typing import Dict, Any, Optional
 
-# Try to import TensorFlow
+# Try to import TensorFlow. When TF is missing we keep stand-in symbols so the
+# class body (which references TF types in annotations) still imports cleanly.
 try:
     import tensorflow as tf
     from tensorflow.keras.applications import EfficientNetB3
@@ -19,6 +21,11 @@ try:
     TF_AVAILABLE = True
 except ImportError:
     TF_AVAILABLE = False
+    tf = None
+    EfficientNetB3 = None
+    layers = None
+    Model = None
+    img_to_array = None
     print("Warning: TensorFlow not available. Skin Cancer Classification will use mock predictions.")
 
 # Skin cancer classification labels
