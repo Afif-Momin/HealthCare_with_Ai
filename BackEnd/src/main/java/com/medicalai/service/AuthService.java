@@ -1,17 +1,24 @@
 package com.medicalai.service;
 
 import com.medicalai.dto.*;
+import com.medicalai.entity.Patient;
 import com.medicalai.entity.User;
+import com.medicalai.repository.PatientRepository;
 import com.medicalai.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.mail.internet.MimeMessage;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
@@ -21,6 +28,9 @@ public class AuthService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private PatientRepository patientRepository;
 
     @Autowired
     private JavaMailSender mailSender;
@@ -108,6 +118,9 @@ public class AuthService {
 
         User user = optUser.get();
         if (user.isVerified()) {
+            if (user.getRole() == User.Role.PATIENT) {
+                ensurePatientRecord(user);
+            }
             String token = generateToken(user);
             AuthResponse resp = new AuthResponse(token, user.getRole().name(), user.getEmail(), user.getFullName(), user.getId());
             resp.setMessage("Already verified. Logged in successfully.");
@@ -122,6 +135,10 @@ public class AuthService {
         user.setOtpCode(null);
         user.setOtpExpiry(null);
         userRepository.save(user);
+
+        if (user.getRole() == User.Role.PATIENT) {
+            ensurePatientRecord(user);
+        }
 
         String token = generateToken(user);
         AuthResponse resp = new AuthResponse(token, user.getRole().name(), user.getEmail(), user.getFullName(), user.getId());
@@ -172,6 +189,10 @@ public class AuthService {
             return resp;
         }
 
+        if (user.getRole() == User.Role.PATIENT) {
+            ensurePatientRecord(user);
+        }
+
         String token = generateToken(user);
         AuthResponse resp = new AuthResponse(token, user.getRole().name(), user.getEmail(), user.getFullName(), user.getId());
         resp.setMessage("Welcome back, " + user.getFullName() + "!");
@@ -209,7 +230,88 @@ public class AuthService {
         return new AuthResponse(true, "Profile updated successfully.");
     }
 
-    // ── Helpers ──────────────────────────────────────────────────────────────
+    // ── Internal helpers ─────────────────────────────────────────────────────
+
+    @EventListener(ApplicationReadyEvent.class)
+    @Transactional
+    public void backfillPatientRecords() {
+        try {
+            List<User> verifiedPatients = userRepository.findByRoleAndIsVerified(User.Role.PATIENT, true);
+            System.out.println("🔍 Patient backfill scanning " + verifiedPatients.size() + " verified PATIENT user(s)...");
+            int created = 0;
+            int skipped = 0;
+            for (User u : verifiedPatients) {
+                if (patientRepository.findByEmail(u.getEmail()).isPresent()) {
+                    skipped++;
+                    continue;
+                }
+                if (ensurePatientRecord(u)) created++;
+            }
+            System.out.println("✅ Patient backfill done — created " + created + ", already-present " + skipped);
+        } catch (Exception e) {
+            System.err.println("❌ Patient backfill failed:");
+            e.printStackTrace();
+        }
+    }
+
+    @Transactional
+    public boolean ensurePatientRecord(User user) {
+        try {
+            if (patientRepository.findByEmail(user.getEmail()).isPresent()) return false;
+
+            Patient p = new Patient();
+            String fullName = user.getFullName() != null ? user.getFullName().trim() : "";
+            int space = fullName.indexOf(' ');
+            if (space > 0) {
+                p.setFirstName(fullName.substring(0, space));
+                p.setLastName(fullName.substring(space + 1));
+            } else {
+                p.setFirstName(fullName.isEmpty() ? "Unknown" : fullName);
+                p.setLastName("-");
+            }
+            p.setEmail(user.getEmail());
+
+            // phoneNumber has a UNIQUE constraint — set to null if it would collide
+            String phone = user.getPhone();
+            if (phone != null && !phone.isBlank()) {
+                if (patientRepository.findByPhoneNumber(phone).isPresent()) {
+                    System.err.println("⚠️  Phone " + phone + " already used; saving patient " + user.getEmail() + " without phone.");
+                    phone = null;
+                }
+            }
+            p.setPhoneNumber(phone);
+
+            p.setBloodGroup(user.getBloodGroup());
+            p.setAllergies(user.getAllergies());
+            p.setMedicalHistory(user.getMedicalHistorySummary());
+            p.setAddress(user.getAddress());
+            p.setEmergencyContactName(user.getEmergencyContactName());
+            p.setEmergencyContactPhone(user.getEmergencyContactPhone());
+            p.setHeight(user.getHeight());
+            p.setWeight(user.getWeight());
+
+            if (user.getGender() != null) {
+                try { p.setGender(Patient.Gender.valueOf(user.getGender().toUpperCase())); }
+                catch (Exception ignored) {}
+            }
+
+            LocalDate dob = null;
+            if (user.getDateOfBirth() != null && !user.getDateOfBirth().isBlank()) {
+                try { dob = LocalDate.parse(user.getDateOfBirth()); } catch (Exception ignored) {}
+            }
+            p.setDateOfBirth(dob != null ? dob : LocalDate.of(1990, 1, 1));
+
+            patientRepository.save(p);
+            System.out.println("✅ Created patient record for " + user.getEmail());
+            return true;
+        } catch (Exception e) {
+            System.err.println("❌ ensurePatientRecord failed for " + user.getEmail() + ": " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // ── Token / OTP helpers ──────────────────────────────────────────────────
 
     private String generateOtp() {
         return String.valueOf(100000 + new Random().nextInt(900000));

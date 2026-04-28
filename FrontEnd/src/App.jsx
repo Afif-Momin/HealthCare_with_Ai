@@ -81,9 +81,9 @@ function AppRoutes() {
 
               {/* Appointments */}
               <Route path="/appointments" element={<Appointments />} />
-              <Route path="/appointments/new" element={<ProtectedRoute allowedRoles={['ADMIN','DOCTOR','NURSE']}><AppointmentForm /></ProtectedRoute>} />
+              <Route path="/appointments/new" element={<ProtectedRoute allowedRoles={['ADMIN','DOCTOR','NURSE','PATIENT']}><AppointmentForm /></ProtectedRoute>} />
               <Route path="/appointments/:id" element={<AppointmentView />} />
-              <Route path="/appointments/:id/edit" element={<ProtectedRoute allowedRoles={['ADMIN','DOCTOR','NURSE']}><AppointmentForm /></ProtectedRoute>} />
+              <Route path="/appointments/:id/edit" element={<ProtectedRoute allowedRoles={['ADMIN','DOCTOR','NURSE','PATIENT']}><AppointmentForm /></ProtectedRoute>} />
 
               {/* Prescriptions */}
               <Route path="/prescriptions" element={<Prescriptions />} />
@@ -91,16 +91,16 @@ function AppRoutes() {
               <Route path="/prescriptions/:id" element={<PrescriptionView />} />
               <Route path="/prescriptions/:id/edit" element={<ProtectedRoute allowedRoles={['ADMIN','DOCTOR']}><PrescriptionForm /></ProtectedRoute>} />
 
-              {/* AI Analysis — Admin, Doctor only */}
+              {/* AI Analysis */}
               <Route path="/ai-analysis" element={<ProtectedRoute allowedRoles={['ADMIN','DOCTOR']}><AIAnalysis /></ProtectedRoute>} />
-              <Route path="/ai-analysis/new" element={<ProtectedRoute allowedRoles={['ADMIN','DOCTOR']}><AIAnalysisForm /></ProtectedRoute>} />
-              <Route path="/ai-analysis/:id" element={<ProtectedRoute allowedRoles={['ADMIN','DOCTOR']}><AIAnalysisView /></ProtectedRoute>} />
+              <Route path="/ai-analysis/new" element={<ProtectedRoute allowedRoles={['ADMIN','DOCTOR','PATIENT']}><AIAnalysisForm /></ProtectedRoute>} />
+              <Route path="/ai-analysis/:id" element={<ProtectedRoute allowedRoles={['ADMIN','DOCTOR','PATIENT']}><AIAnalysisView /></ProtectedRoute>} />
 
-              {/* Voice — Admin, Doctor only */}
-              <Route path="/voice-consultation" element={<ProtectedRoute allowedRoles={['ADMIN','DOCTOR']}><VoiceConsultation /></ProtectedRoute>} />
+              {/* Voice */}
+              <Route path="/voice-consultation" element={<ProtectedRoute allowedRoles={['ADMIN','DOCTOR','PATIENT']}><VoiceConsultation /></ProtectedRoute>} />
 
-              {/* Advanced — Admin, Doctor only */}
-              <Route path="/advanced-detection" element={<ProtectedRoute allowedRoles={['ADMIN','DOCTOR']}><AdvancedDetection /></ProtectedRoute>} />
+              {/* Advanced Detection */}
+              <Route path="/advanced-detection" element={<ProtectedRoute allowedRoles={['ADMIN','DOCTOR','PATIENT']}><AdvancedDetection /></ProtectedRoute>} />
               <Route path="/population-intelligence" element={<ProtectedRoute allowedRoles={['ADMIN','DOCTOR']}><PopulationIntelligence /></ProtectedRoute>} />
               <Route path="/outbreak-detection" element={<ProtectedRoute allowedRoles={['ADMIN','DOCTOR']}><OutbreakDetection /></ProtectedRoute>} />
               <Route path="/health-story/:patientId" element={<ProtectedRoute allowedRoles={['ADMIN','DOCTOR']}><HealthStory /></ProtectedRoute>} />

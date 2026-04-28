@@ -150,6 +150,12 @@ public class PatientService {
         return convertToDTO(updatedPatient);
     }
 
+    public PatientDTO getPatientByEmail(String email) {
+        return patientRepository.findByEmail(email.toLowerCase().trim())
+                .map(this::convertToDTO)
+                .orElse(null);
+    }
+
     public void deletePatient(Long id) {
         if (!patientRepository.existsById(id)) {
             throw new ResourceNotFoundException("Patient", id);

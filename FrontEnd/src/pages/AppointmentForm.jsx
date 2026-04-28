@@ -1,21 +1,25 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, Link, useSearchParams } from 'react-router-dom'
-import { Save, ArrowLeft } from 'lucide-react'
+import { Save, ArrowLeft, Lock } from 'lucide-react'
 import { appointmentsAPI, patientsAPI } from '../services/api'
-import { formatDateTimeInput } from '../utils/dateUtils'
+import { formatDateTimeInput, nowIST, istInputToUTC } from '../utils/dateUtils'
+import { useAuth } from '../context/AuthContext'
 
 const AppointmentForm = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
+  const { user } = useAuth()
+  const isPatient = user?.role === 'PATIENT'
   const isEdit = !!id
   const [loading, setLoading] = useState(false)
   const [patients, setPatients] = useState([])
+  const [patientName, setPatientName] = useState('')
   const [formData, setFormData] = useState({
     patientId: searchParams.get('patientId') || '',
     doctorName: '',
     department: '',
-    appointmentDate: new Date().toISOString().slice(0, 16),
+    appointmentDate: nowIST(),
     status: 'SCHEDULED',
     reason: '',
     notes: '',
@@ -23,12 +27,27 @@ const AppointmentForm = () => {
   })
 
   useEffect(() => {
-    fetchPatients()
+    if (isPatient) {
+      resolvePatientFromUser()
+    } else {
+      fetchPatients()
+    }
     if (isEdit && id) {
       fetchAppointment()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, isEdit])
+  }, [id, isEdit, isPatient])
+
+  const resolvePatientFromUser = async () => {
+    try {
+      const response = await patientsAPI.getByEmail(user.email)
+      const p = response.data
+      setFormData(prev => ({ ...prev, patientId: p.id }))
+      setPatientName(`${p.firstName} ${p.lastName}`)
+    } catch (error) {
+      console.error('Could not resolve patient record for logged-in user:', error)
+    }
+  }
 
   const fetchPatients = async () => {
     try {
@@ -47,7 +66,7 @@ const AppointmentForm = () => {
         patientId: appointment.patientId,
         doctorName: appointment.doctorName || '',
         department: appointment.department || '',
-        appointmentDate: appointment.appointmentDate ? formatDateTimeInput(appointment.appointmentDate) : formatDateTimeInput(new Date().toISOString()),
+        appointmentDate: appointment.appointmentDate ? formatDateTimeInput(appointment.appointmentDate) : nowIST(),
         status: appointment.status || 'SCHEDULED',
         reason: appointment.reason || '',
         notes: appointment.notes || '',
@@ -73,7 +92,7 @@ const AppointmentForm = () => {
       const submitData = {
         ...formData,
         patientId: parseInt(formData.patientId),
-        appointmentDate: formData.appointmentDate ? new Date(formData.appointmentDate).toISOString() : new Date().toISOString(),
+        appointmentDate: formData.appointmentDate ? istInputToUTC(formData.appointmentDate) : new Date().toISOString(),
         status: formData.status || 'SCHEDULED',
       }
       if (isEdit) {
@@ -125,21 +144,38 @@ const AppointmentForm = () => {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem' }}>
           <div className="form-group">
             <label className="form-label">Patient *</label>
-            <select
-              name="patientId"
-              value={formData.patientId}
-              onChange={handleChange}
-              className="form-select"
-              required
-              disabled={isEdit}
-            >
-              <option value="">Select Patient</option>
-              {patients.map((patient) => (
-                <option key={patient.id} value={patient.id}>
-                  {patient.firstName} {patient.lastName}
-                </option>
-              ))}
-            </select>
+            {isPatient ? (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.625rem',
+                padding: '0.75rem 1rem',
+                background: 'var(--bg-tertiary)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: '8px',
+                color: 'var(--text-primary)',
+                fontSize: '0.95rem',
+              }}>
+                <Lock size={14} color="var(--text-muted)" />
+                {patientName || 'Loading your profile…'}
+              </div>
+            ) : (
+              <select
+                name="patientId"
+                value={formData.patientId}
+                onChange={handleChange}
+                className="form-select"
+                required
+                disabled={isEdit}
+              >
+                <option value="">Select Patient</option>
+                {patients.map((patient) => (
+                  <option key={patient.id} value={patient.id}>
+                    {patient.firstName} {patient.lastName}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
           <div className="form-group">
@@ -168,7 +204,10 @@ const AppointmentForm = () => {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Appointment Date & Time *</label>
+            <label className="form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              Appointment Date & Time *
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '400' }}>IST (UTC+5:30)</span>
+            </label>
             <input
               type="datetime-local"
               name="appointmentDate"

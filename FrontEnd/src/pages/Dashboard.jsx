@@ -23,8 +23,143 @@ import {
   Star
 } from 'lucide-react'
 import { patientsAPI, medicalRecordsAPI, appointmentsAPI, prescriptionsAPI, aiAnalysisAPI } from '../services/api'
+import { useAuth } from '../context/AuthContext'
+
+const PatientDashboard = ({ user, time }) => {
+  const name = user?.name || user?.fullName || 'Patient'
+  const quickLinks = [
+    { label: 'My Appointments', icon: Calendar, path: '/appointments', color: '#ffd700' },
+    { label: 'My Prescriptions', icon: Pill, path: '/prescriptions', color: '#ff6b6b' },
+    { label: 'Medical Records', icon: FileText, path: '/medical-records', color: '#00ff88' },
+    { label: 'AI Analysis', icon: Brain, path: '/ai-analysis/new', color: '#00d4ff' },
+    { label: 'Voice Consult', icon: Mic, path: '/voice-consultation', color: '#a78bfa' },
+  ]
+
+  return (
+    <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+      {/* Hero */}
+      <div style={{
+        background: 'linear-gradient(135deg, rgba(0,212,255,0.1), rgba(124,58,237,0.1))',
+        border: '1px solid rgba(0,212,255,0.2)',
+        borderRadius: '24px',
+        padding: '2.5rem',
+        marginBottom: '2rem',
+        position: 'relative',
+        overflow: 'hidden',
+        animation: 'fadeInUp 0.6s ease forwards',
+      }}>
+        <div style={{ position: 'absolute', top: '-50px', right: '-50px', width: '200px', height: '200px', background: 'radial-gradient(circle, rgba(0,212,255,0.2), transparent 70%)', borderRadius: '50%', filter: 'blur(40px)' }} />
+        <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '2rem' }}>
+          <div>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(0,212,255,0.15)', border: '1px solid rgba(0,212,255,0.3)', borderRadius: '100px', padding: '0.375rem 1rem', marginBottom: '1rem' }}>
+              <Heart size={14} color="#00d4ff" />
+              <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#00d4ff', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Your Health Portal</span>
+            </div>
+            <h1 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.75rem)', fontWeight: '800', marginBottom: '0.75rem', lineHeight: '1.1' }}>
+              Welcome back,{' '}
+              <span style={{ background: 'var(--gradient-primary)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                {name}
+              </span>
+            </h1>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', maxWidth: '480px', lineHeight: '1.6' }}>
+              Your personal health dashboard. Track appointments, view records, and access AI-powered health insights.
+            </p>
+          </div>
+          <div style={{ background: 'rgba(10,10,18,0.6)', border: '1px solid var(--border-subtle)', borderRadius: '16px', padding: '1.25rem 1.5rem', backdropFilter: 'blur(10px)', textAlign: 'right' }}>
+            <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>Current Time</p>
+            <p style={{ fontSize: '2rem', fontWeight: '700', fontFamily: 'var(--font-mono)', color: 'var(--accent-primary)', letterSpacing: '0.02em' }}>
+              {time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
+            </p>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+              {time.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Links */}
+      <div style={{ marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+          <Zap size={20} color="var(--accent-primary)" />
+          <h2 style={{ fontSize: '1.1rem', fontWeight: '600' }}>Quick Access</h2>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem' }}>
+          {quickLinks.map((item, i) => {
+            const Icon = item.icon
+            return (
+              <Link key={item.label} to={item.path} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem', padding: '1.5rem 1rem', background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '16px', textDecoration: 'none', transition: 'all 0.3s ease', animation: 'fadeInUp 0.5s ease forwards', animationDelay: `${i * 0.08}s`, opacity: 0 }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.borderColor = item.color; e.currentTarget.style.boxShadow = `0 0 30px ${item.color}30` }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'var(--border-subtle)'; e.currentTarget.style.boxShadow = 'none' }}
+              >
+                <div style={{ width: '48px', height: '48px', background: `${item.color}15`, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Icon size={22} color={item.color} />
+                </div>
+                <span style={{ fontSize: '0.85rem', fontWeight: '500', color: 'var(--text-primary)', textAlign: 'center' }}>{item.label}</span>
+              </Link>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Info Cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
+        {[
+          { title: 'Health Profile', desc: 'View and update your personal health information', icon: Heart, gradient: 'linear-gradient(135deg,#ff6b6b,#ffd700)', path: '/profile', glow: 'rgba(255,107,107,0.3)' },
+          { title: 'AI Health Insights', desc: 'Get AI-powered analysis based on your medical data', icon: Brain, gradient: 'linear-gradient(135deg,#00d4ff,#7c3aed)', path: '/ai-analysis/new', glow: 'rgba(0,212,255,0.3)' },
+          { title: 'Upcoming Appointments', desc: 'Check your scheduled appointments and consultations', icon: Calendar, gradient: 'linear-gradient(135deg,#ffd700,#00ff88)', path: '/appointments', glow: 'rgba(255,215,0,0.3)' },
+        ].map((card, i) => {
+          const Icon = card.icon
+          return (
+            <Link key={card.title} to={card.path} style={{ textDecoration: 'none', animation: 'fadeInUp 0.5s ease forwards', animationDelay: `${(i + 5) * 0.1}s`, opacity: 0 }}>
+              <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '20px', padding: '1.5rem', position: 'relative', overflow: 'hidden', transition: 'all 0.3s ease', cursor: 'pointer', height: '100%' }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = `0 0 40px ${card.glow}` }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}
+              >
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: card.gradient }} />
+                <div style={{ width: '52px', height: '52px', background: card.gradient, borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 4px 20px ${card.glow}`, marginBottom: '1rem' }}>
+                  <Icon size={24} color="white" />
+                </div>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '0.5rem' }}>{card.title}</h3>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', lineHeight: '1.5', marginBottom: '1rem' }}>{card.desc}</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                  <span>Go to {card.title}</span>
+                  <ArrowRight size={14} />
+                </div>
+              </div>
+            </Link>
+          )
+        })}
+      </div>
+
+      {/* System Status */}
+      <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '20px', padding: '1.5rem', animation: 'fadeInUp 0.5s ease forwards', animationDelay: '0.8s', opacity: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
+          <Shield size={20} color="var(--accent-primary)" />
+          <h2 style={{ fontSize: '1.1rem', fontWeight: '600' }}>System Status</h2>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+          {[
+            { label: 'AI Engine', status: 'Operational', color: '#00ff88' },
+            { label: 'Health Records', status: 'Secure', color: '#00ff88' },
+            { label: 'Data Privacy', status: 'Protected', color: '#00d4ff' },
+            { label: 'Services', status: 'Running', color: '#00ff88' },
+          ].map(item => (
+            <div key={item.label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', background: 'var(--bg-tertiary)', borderRadius: '12px' }}>
+              <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{item.label}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: item.color, boxShadow: `0 0 10px ${item.color}` }} />
+                <span style={{ fontSize: '0.8rem', fontWeight: '600', color: item.color }}>{item.status}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 const Dashboard = () => {
+  const { user } = useAuth()
   const [stats, setStats] = useState({
     patients: 0,
     medicalRecords: 0,
@@ -168,6 +303,10 @@ const Dashboard = () => {
         <p className="loading-text">Initializing AI Systems...</p>
       </div>
     )
+  }
+
+  if (user?.role === 'PATIENT') {
+    return <PatientDashboard user={user} time={time} />
   }
 
   return (

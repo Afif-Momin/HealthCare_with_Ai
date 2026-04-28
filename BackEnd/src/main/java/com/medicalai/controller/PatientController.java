@@ -29,6 +29,13 @@ public class PatientController {
         return ResponseEntity.ok(patient);
     }
 
+    @GetMapping("/by-email")
+    public ResponseEntity<PatientDTO> getPatientByEmail(@RequestParam String email) {
+        PatientDTO patient = patientService.getPatientByEmail(email);
+        if (patient == null) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(patient);
+    }
+
     @GetMapping
     public ResponseEntity<List<PatientDTO>> getAllPatients(
             @RequestParam(required = false) String search) {

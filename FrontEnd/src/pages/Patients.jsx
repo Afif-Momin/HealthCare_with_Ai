@@ -19,26 +19,43 @@ import {
 import { patientsAPI } from '../services/api'
 
 const Patients = () => {
-  const [patients, setPatients] = useState([])
+  const [allPatients, setAllPatients] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
-  const [viewMode, setViewMode] = useState('table') // 'table' or 'grid'
+  const [showFilters, setShowFilters] = useState(false)
+  const [filterGender, setFilterGender] = useState('')
+  const [filterBloodGroup, setFilterBloodGroup] = useState('')
 
   useEffect(() => {
     fetchPatients()
-  }, [searchTerm])
+  }, [])
 
   const fetchPatients = async () => {
     try {
       setLoading(true)
-      const response = await patientsAPI.getAll(searchTerm || undefined)
-      setPatients(response.data)
+      const response = await patientsAPI.getAll()
+      setAllPatients(response.data)
     } catch (error) {
       console.error('Error fetching patients:', error)
     } finally {
       setLoading(false)
     }
   }
+
+  const patients = allPatients.filter((p) => {
+    const q = searchTerm.toLowerCase().trim()
+    if (q) {
+      const fullName = `${p.firstName || ''} ${p.lastName || ''}`.toLowerCase()
+      const email = (p.email || '').toLowerCase()
+      const phone = (p.phoneNumber || '').toLowerCase()
+      if (!fullName.includes(q) && !email.includes(q) && !phone.includes(q)) return false
+    }
+    if (filterGender && p.gender !== filterGender) return false
+    if (filterBloodGroup && p.bloodGroup !== filterBloodGroup) return false
+    return true
+  })
+
+  const activeFilterCount = [filterGender, filterBloodGroup].filter(Boolean).length
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this patient?')) {
@@ -188,16 +205,31 @@ const Patients = () => {
 
           {/* Filter Button */}
           <button
+            onClick={() => setShowFilters(prev => !prev)}
             className="btn btn-outline"
-            style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '0.5rem' 
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              borderColor: activeFilterCount > 0 ? 'var(--accent-primary)' : undefined,
+              color: activeFilterCount > 0 ? 'var(--accent-primary)' : undefined,
             }}
           >
             <Filter size={16} />
             Filters
-            <ChevronDown size={14} />
+            {activeFilterCount > 0 && (
+              <span style={{
+                background: 'var(--accent-primary)',
+                color: '#000',
+                borderRadius: '100px',
+                fontSize: '0.7rem',
+                fontWeight: '700',
+                padding: '0.1rem 0.45rem',
+              }}>
+                {activeFilterCount}
+              </span>
+            )}
+            <ChevronDown size={14} style={{ transform: showFilters ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
           </button>
 
           {/* Stats */}
@@ -210,14 +242,92 @@ const Patients = () => {
             borderRadius: '10px',
           }}>
             <Activity size={16} color="var(--accent-primary)" />
-            <span style={{ 
-              fontSize: '0.85rem', 
-              color: 'var(--text-secondary)' 
-            }}>
-              <strong style={{ color: 'var(--accent-primary)' }}>{patients.length}</strong> patients
+            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+              <strong style={{ color: 'var(--accent-primary)' }}>{patients.length}</strong>
+              {allPatients.length !== patients.length ? ` of ${allPatients.length}` : ''} patients
             </span>
           </div>
         </div>
+
+        {/* Filter Panel */}
+        {showFilters && (
+          <div style={{
+            marginTop: '1rem',
+            paddingTop: '1rem',
+            borderTop: '1px solid var(--border-subtle)',
+            display: 'flex',
+            gap: '1rem',
+            flexWrap: 'wrap',
+            alignItems: 'flex-end',
+          }}>
+            <div>
+              <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '0.4rem' }}>
+                Gender
+              </label>
+              <select
+                value={filterGender}
+                onChange={e => setFilterGender(e.target.value)}
+                style={{
+                  padding: '0.5rem 0.875rem',
+                  borderRadius: '8px',
+                  border: '1px solid var(--border-subtle)',
+                  background: 'var(--bg-tertiary)',
+                  color: 'var(--text-primary)',
+                  fontSize: '0.875rem',
+                  cursor: 'pointer',
+                  minWidth: '130px',
+                }}
+              >
+                <option value="">All genders</option>
+                <option value="MALE">Male</option>
+                <option value="FEMALE">Female</option>
+                <option value="OTHER">Other</option>
+              </select>
+            </div>
+
+            <div>
+              <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '0.4rem' }}>
+                Blood Group
+              </label>
+              <select
+                value={filterBloodGroup}
+                onChange={e => setFilterBloodGroup(e.target.value)}
+                style={{
+                  padding: '0.5rem 0.875rem',
+                  borderRadius: '8px',
+                  border: '1px solid var(--border-subtle)',
+                  background: 'var(--bg-tertiary)',
+                  color: 'var(--text-primary)',
+                  fontSize: '0.875rem',
+                  cursor: 'pointer',
+                  minWidth: '130px',
+                }}
+              >
+                <option value="">All blood groups</option>
+                {['A+','A-','B+','B-','AB+','AB-','O+','O-'].map(bg => (
+                  <option key={bg} value={bg}>{bg}</option>
+                ))}
+              </select>
+            </div>
+
+            {activeFilterCount > 0 && (
+              <button
+                onClick={() => { setFilterGender(''); setFilterBloodGroup('') }}
+                style={{
+                  padding: '0.5rem 0.875rem',
+                  background: 'transparent',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: '8px',
+                  color: 'var(--text-secondary)',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem',
+                }}
+              >
+                Clear filters
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Content */}

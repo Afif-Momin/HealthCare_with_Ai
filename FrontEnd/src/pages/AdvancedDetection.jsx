@@ -101,8 +101,8 @@ const DETECTION_TYPES = {
 
 const AdvancedDetection = () => {
     const [selectedType, setSelectedType] = useState(null)
-    const [files, setFiles] = useState([])
-    const [previews, setPreviews] = useState([])
+    const [file, setFile] = useState(null)
+    const [preview, setPreview] = useState(null)
     const [loading, setLoading] = useState(false)
     const [result, setResult] = useState(null)
     const [error, setError] = useState(null)
@@ -135,56 +135,43 @@ const AdvancedDetection = () => {
 
     const handleTypeSelect = (typeId) => {
         setSelectedType(DETECTION_TYPES[typeId])
-        setFiles([])
-        setPreviews([])
+        setFile(null)
+        setPreview(null)
         setResult(null)
         setError(null)
     }
 
-    const handleFileSelect = (e) => {
-        if (e.target.files && e.target.files.length > 0) {
-            const newFiles = Array.from(e.target.files)
-            setFiles(prev => [...prev, ...newFiles])
-            setError(null)
-            setResult(null)
-
-            // Generate previews for images
-            newFiles.forEach(file => {
-                if (file.type.startsWith('image/')) {
-                    const reader = new FileReader()
-                    reader.onload = (e) => {
-                        setPreviews(prev => [...prev, { name: file.name, src: e.target.result }])
-                    }
-                    reader.readAsDataURL(file)
-                }
-            })
+    const setFileWithPreview = (selectedFile) => {
+        if (!selectedFile) return
+        setFile(selectedFile)
+        setError(null)
+        setResult(null)
+        if (selectedFile.type.startsWith('image/')) {
+            const reader = new FileReader()
+            reader.onload = (e) => setPreview(e.target.result)
+            reader.readAsDataURL(selectedFile)
+        } else {
+            setPreview(null)
         }
     }
 
-    const removeFile = (index) => {
-        const fileToRemove = files[index]
-        setFiles(prev => prev.filter((_, i) => i !== index))
-        setPreviews(prev => prev.filter(p => p.name !== fileToRemove.name))
+    const handleFileSelect = (e) => {
+        if (e.target.files && e.target.files.length > 0) {
+            setFileWithPreview(e.target.files[0])
+        }
+    }
+
+    const handleRemoveFile = () => {
+        setFile(null)
+        setPreview(null)
+        if (fileInputRef.current) fileInputRef.current.value = ''
     }
 
     const handleDrop = (e) => {
         e.preventDefault()
         const droppedFiles = e.dataTransfer.files
         if (droppedFiles && droppedFiles.length > 0) {
-            const newFiles = Array.from(droppedFiles)
-            setFiles(prev => [...prev, ...newFiles])
-            setError(null)
-            setResult(null)
-
-            newFiles.forEach(file => {
-                if (file.type.startsWith('image/')) {
-                    const reader = new FileReader()
-                    reader.onload = (e) => {
-                        setPreviews(prev => [...prev, { name: file.name, src: e.target.result }])
-                    }
-                    reader.readAsDataURL(file)
-                }
-            })
+            setFileWithPreview(droppedFiles[0])
         }
     }
 
@@ -196,7 +183,7 @@ const AdvancedDetection = () => {
         if (!selectedType) return
 
         // For thyroid, we don't need a file - we'll use form data
-        if (selectedType.id !== 'thyroid' && files.length === 0) return
+        if (selectedType.id !== 'thyroid' && !file) return
 
         setLoading(true)
         setError(null)
@@ -210,9 +197,7 @@ const AdvancedDetection = () => {
                 response = await advancedDetectionAPI.thyroid(thyroidFormData)
             } else {
                 const formData = new FormData()
-                files.forEach(file => {
-                    formData.append('files', file)
-                })
+                formData.append('files', file)
 
                 switch (selectedType.id) {
                     case 'retinal':
@@ -236,14 +221,12 @@ const AdvancedDetection = () => {
     }
 
     const resetAnalysis = () => {
-        setFiles([])
-        setPreviews([])
+        setFile(null)
+        setPreview(null)
         setResult(null)
         setError(null)
         setActiveResultIndex(0)
-        if (fileInputRef.current) {
-            fileInputRef.current.value = ''
-        }
+        if (fileInputRef.current) fileInputRef.current.value = ''
     }
 
     const getRiskColor = (level) => {
@@ -613,130 +596,120 @@ const AdvancedDetection = () => {
                         onDrop={handleDrop}
                         onDragOver={handleDragOver}
                         style={{
-                            border: `2px dashed ${files.length > 0 ? selectedType.color : 'var(--border-light)'}`,
+                            border: `2px dashed ${file ? selectedType.color : 'var(--border-light)'}`,
                             borderRadius: '16px',
                             padding: '2.5rem',
                             textAlign: 'center',
                             cursor: 'default',
                             transition: 'all 0.3s ease',
-                            background: files.length > 0 ? `${selectedType.color}08` : 'transparent',
+                            background: file ? `${selectedType.color}08` : 'transparent',
                         }}
                     >
                         <input
                             ref={fileInputRef}
                             type="file"
-                            multiple
                             accept={selectedType.acceptedFormats}
                             onChange={handleFileSelect}
                             style={{ display: 'none' }}
                         />
 
-                        {files.length > 0 ? (
+                        {file ? (
                             <div>
-                                <div style={{
-                                    display: 'grid',
-                                    gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
-                                    gap: '1rem',
-                                    marginBottom: '1.5rem'
-                                }}>
-                                    {files.map((file, index) => {
-                                        const preview = previews.find(p => p.name === file.name)?.src
-                                        return (
-                                            <div key={index} style={{
-                                                background: 'var(--bg-tertiary)',
+                                {/* Large image preview */}
+                                <div style={{ position: 'relative', marginBottom: '1rem' }}>
+                                    {preview && isImage ? (
+                                        <img
+                                            src={preview}
+                                            alt={file.name}
+                                            style={{
+                                                width: '100%',
+                                                maxHeight: '380px',
+                                                objectFit: 'contain',
                                                 borderRadius: '12px',
-                                                padding: '0.75rem',
-                                                border: '1px solid var(--border-subtle)',
-                                                position: 'relative'
-                                            }}>
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation()
-                                                        removeFile(index)
-                                                    }}
-                                                    style={{
-                                                        position: 'absolute',
-                                                        top: '-8px',
-                                                        right: '-8px',
-                                                        background: 'var(--bg-card)',
-                                                        border: '1px solid var(--border-subtle)',
-                                                        borderRadius: '50%',
-                                                        width: '24px',
-                                                        height: '24px',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        cursor: 'pointer',
-                                                        color: 'var(--text-secondary)'
-                                                    }}
-                                                >
-                                                    <X size={14} />
-                                                </button>
-
-                                                {preview && isImage ? (
-                                                    <img
-                                                        src={preview}
-                                                        alt={file.name}
-                                                        style={{
-                                                            width: '100%',
-                                                            height: '100px',
-                                                            objectFit: 'cover',
-                                                            borderRadius: '8px',
-                                                            marginBottom: '0.5rem'
-                                                        }}
-                                                    />
-                                                ) : (
-                                                    <div style={{
-                                                        width: '100%',
-                                                        height: '100px',
-                                                        background: selectedType.gradient,
-                                                        borderRadius: '8px',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        marginBottom: '0.5rem'
-                                                    }}>
-                                                        {isImage ? <FileImage size={24} color="white" /> : <FileAudio size={24} color="white" />}
-                                                    </div>
-                                                )}
-                                                <p style={{ fontSize: '0.8rem', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{file.name}</p>
-                                                <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{(file.size / 1024 / 1024).toFixed(2)} MB</p>
-                                            </div>
-                                        )
-                                    })}
-
-                                    {/* Add More Button */}
-                                    <div
-                                        onClick={() => fileInputRef.current?.click()}
-                                        style={{
-                                            border: '2px dashed var(--border-subtle)',
+                                                border: `1px solid ${selectedType.color}40`,
+                                                background: 'var(--bg-tertiary)',
+                                                display: 'block',
+                                            }}
+                                        />
+                                    ) : (
+                                        <div style={{
+                                            width: '100%',
+                                            height: '160px',
+                                            background: selectedType.gradient,
                                             borderRadius: '12px',
                                             display: 'flex',
                                             flexDirection: 'column',
                                             alignItems: 'center',
                                             justifyContent: 'center',
-                                            cursor: 'pointer',
-                                            minHeight: '150px',
-                                            color: 'var(--text-secondary)'
-                                        }}
-                                    >
-                                        <Upload size={24} style={{ marginBottom: '0.5rem' }} />
-                                        <span style={{ fontSize: '0.9rem' }}>Add More</span>
-                                    </div>
-                                </div>
-                                <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+                                            gap: '0.75rem',
+                                        }}>
+                                            <FileImage size={40} color="white" />
+                                            <p style={{ color: 'white', fontWeight: '600' }}>{file.name}</p>
+                                        </div>
+                                    )}
+
+                                    {/* Remove button overlay */}
                                     <button
-                                        onClick={() => setFiles([])}
+                                        onClick={(e) => { e.stopPropagation(); handleRemoveFile() }}
                                         style={{
-                                            padding: '0.75rem 1.5rem',
-                                            background: 'transparent',
-                                            border: '1px solid var(--border-subtle)',
-                                            borderRadius: '8px',
-                                            color: 'var(--text-primary)',
+                                            position: 'absolute',
+                                            top: '10px',
+                                            right: '10px',
+                                            background: 'rgba(0,0,0,0.7)',
+                                            backdropFilter: 'blur(6px)',
+                                            border: '1px solid rgba(255,255,255,0.2)',
+                                            borderRadius: '50%',
+                                            width: '32px',
+                                            height: '32px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
                                             cursor: 'pointer',
+                                            color: 'white',
                                         }}
                                     >
-                                        Clear All
+                                        <X size={16} />
+                                    </button>
+                                </div>
+
+                                {/* File info + change button */}
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    padding: '0.75rem 1rem',
+                                    background: `${selectedType.color}10`,
+                                    border: `1px solid ${selectedType.color}30`,
+                                    borderRadius: '10px',
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                        <FileImage size={18} color={selectedType.color} />
+                                        <div>
+                                            <p style={{ fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-primary)', maxWidth: '240px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                {file.name}
+                                            </p>
+                                            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                                                {file.size >= 1024 * 1024
+                                                    ? `${(file.size / 1024 / 1024).toFixed(2)} MB`
+                                                    : `${(file.size / 1024).toFixed(1)} KB`}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => fileInputRef.current?.click()}
+                                        style={{
+                                            padding: '0.5rem 1rem',
+                                            background: 'transparent',
+                                            border: `1px solid ${selectedType.color}60`,
+                                            borderRadius: '8px',
+                                            color: selectedType.color,
+                                            cursor: 'pointer',
+                                            fontSize: '0.85rem',
+                                            fontWeight: '600',
+                                            whiteSpace: 'nowrap',
+                                        }}
+                                    >
+                                        Change Image
                                     </button>
                                 </div>
                             </div>
@@ -758,7 +731,7 @@ const AdvancedDetection = () => {
                                     Drop your {isImage ? 'image' : 'audio'} file here
                                 </p>
                                 <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-                                    or click to browse
+                                    or click to browse &nbsp;·&nbsp; one file at a time
                                 </p>
                                 <p style={{
                                     fontSize: '0.75rem',
@@ -777,7 +750,7 @@ const AdvancedDetection = () => {
 
                 {/* Analyze Button */}
                 {/* Analyze Button */}
-                {(files.length > 0 || selectedType?.id === 'thyroid') && !result && (
+                {(file || selectedType?.id === 'thyroid') && !result && (
                     <button
                         onClick={handleAnalyze}
                         disabled={loading}
